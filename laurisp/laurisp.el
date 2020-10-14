@@ -28,7 +28,7 @@
 (import-files "core")
 (import-files "lazy-funcs")
 (import-files "config")
-
+(load "~/laurisp/external/emacs-grammarly/emacs-grammarly.el")
 
 (provide 'laurisp)
 
