@@ -8,5 +8,14 @@
 ;; slack related functions
 ;;
 
+
+
+;; load and start
 (load-file "~/.private/slack-config.el")
 (slack-start)
+
+;; hooks
+(add-hook 'slack-mode-hook 'emojify-mode)
+
+;; keybinds
+

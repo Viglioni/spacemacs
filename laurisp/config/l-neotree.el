@@ -35,4 +35,4 @@
 (activate-neotree-icons)
 (setq neo-theme 'icons)
 (setq projectile-switch-project-action 'neotree-projectile-action)
-
+(setq neo-window-fixed-size nil)

@@ -19,9 +19,10 @@
                         ("<=" . ?≤)
                         (">=" . ?≥)
                         ("&&" . ?∧)
-                        ("||" . ?∨)))
+                        ("||" . ?∨)
+                        (">>" . ?≫)))
 
-(setq js-family-symbols '(("!" . ?¬)))
+(setq js-family-symbols nil)
 
 (defun add-symbols-to-mode (&optional symbols)
   (dolist (symbol (append generic-symbols symbols))
@@ -32,3 +33,6 @@
 (add-hook 'tide-mode-hook
           (lambda () (add-symbols-to-mode js-family-symbols)))
 
+;; applying to elisp mode
+(add-hook 'emacs-lisp-mode-hook
+          (lambda () (add-symbols-to-mode)))

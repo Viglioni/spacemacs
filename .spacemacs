@@ -40,7 +40,9 @@ values."
                  typescript-linter 'eslint)
      html
      yaml
-     clojure
+     (clojure :variables
+              clojure-enable-fancify-symbols t
+              clojure-enable-linters 'clj-kondo)
      (javascript :variables
                  javascript-backend 'tide
                  javascript-fmt-tool 'prettier
@@ -69,15 +71,16 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages
    '(
+     aio
      rjsx-mode
      yasnippet-snippets
      dart-mode
      prettier-js
      all-the-icons
-     import-js
      epresent
      org-fragtog
      latex-extra
+     exec-path-from-shell
      )
 
 
@@ -279,7 +282,7 @@ values."
    ;; Control line numbers activation.
    ;; If set to `t' or `relative' line numbers are turned on in all `prog-mode' and
    ;; `text-mode' derivatives. If set to `relative', line numbers are relative.
-   ;; This variable can also be set to a property list for finer control:
+  ;; This variable can also be set to a property list for finer control:
    ;; '(:relative nil
    ;;   :disabled-for-modes dired-mode
    ;;                       doc-view-mode
@@ -330,6 +333,7 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  (setq lexical-binding t)
   (add-to-list 'load-path "~/laurisp"))
 
 (defun dotspacemacs/user-config ()
@@ -339,6 +343,7 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  
   (require 'laurisp))
 
 
@@ -352,7 +357,7 @@ you should place your code here."
  ;; If there is more than one, they won't work right.
  '(js2-strict-missing-semi-warning nil)
  '(package-selected-packages
-   '(latex-extra auctex org-fragtog math-symbols latex-math-preview org-projectile org-category-capture org-present org-pomodoro org-mime org-download htmlize gnuplot epresent grizzl import-js list-packages-ext yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js csv-mode tide typescript-mode clomacs xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help memoize all-the-icons yaml-mode dart-mode slack emojify circe oauth2 websocket ht alert log4e gntp spotify helm-spotify-plus multi clojure-snippets clj-refactor inflections paredit cider-eval-sexp-fu cider sesman queue parseedn clojure-mode parseclj a yasnippet-snippets tern rjsx-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data markdown-mode magit-popup gitignore-mode flyspell-correct pos-tip magit git-commit with-editor transient web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc coffee-mode flycheck ghc haskell-mode company yasnippet auto-complete define-word ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline smeargle reveal-in-osx-finder restart-emacs rainbow-delimiters popwin persp-mode pcre2el pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint launchctl intero indent-guide hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish company-statistics company-ghci company-ghc company-cabal column-enforce-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(lexbind-mode async-await aio wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy keychain-environment latex-extra auctex org-fragtog math-symbols latex-math-preview org-projectile org-category-capture org-present org-pomodoro org-mime org-download htmlize gnuplot epresent grizzl import-js list-packages-ext yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js csv-mode tide typescript-mode clomacs xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help memoize all-the-icons yaml-mode dart-mode slack emojify circe oauth2 websocket ht alert log4e gntp spotify helm-spotify-plus multi clojure-snippets clj-refactor inflections paredit cider-eval-sexp-fu cider sesman queue parseedn clojure-mode parseclj a yasnippet-snippets tern rjsx-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data markdown-mode magit-popup gitignore-mode flyspell-correct pos-tip magit git-commit with-editor transient web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc coffee-mode flycheck ghc haskell-mode company yasnippet auto-complete define-word ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline smeargle reveal-in-osx-finder restart-emacs rainbow-delimiters popwin persp-mode pcre2el pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint launchctl intero indent-guide hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish company-statistics company-ghci company-ghc company-cabal column-enforce-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(standard-indent 2)
  '(tab-width 1))
 (custom-set-faces

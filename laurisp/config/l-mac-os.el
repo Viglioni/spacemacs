@@ -10,5 +10,6 @@
 
 
 (when (memq window-system '(mac ns))
-  (package-install 'exec-path-from-shell)
   (exec-path-from-shell-initialize))
+
+

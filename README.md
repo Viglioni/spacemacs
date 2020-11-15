@@ -3,7 +3,9 @@
 Clone this repo in your ~/
 
 # installs
-third part installs
+third party installs
+
+`brew install borkdude/brew/clj-kondo`
 
 `brew install ispell`
 
