@@ -35,39 +35,6 @@
          (curried (seq-map #'apply-curry-on-list funcs)))
     (funcall (apply #'_compose curried) args)))
 
-(defun identity (x) x)
-
-;; (compose '('(#'+ 1)
-;;            '(#'* 10))
-;;          10) ;; => 101
-
-;; (-> 10
-;;    '('(* 10)
-;;      '(+ 1))) ;; => 101
 
 
-
-
-
-(defmacro list-func (function-list)
-  (destructuring-bind (fn &rest args) function-list
-    `(append (list (quote ,fn)) (quote ,args))
-    ))
-
-;; (list-func (* 1 2))
-
-(defmacro comp (binding )
-  (destructuring-bind ( f  &rest fs) binding
-
-    ;(seq-map #'list-func fs)
-    ))
-
-;; (comp ((* 1 2 3)
-;;        (+ 1))
-;;       )
-
-;; (append (list '*)  '(1 2))
-
-
-;; (comp ( (* 10) (+ 1)) 1) 
 
