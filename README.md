@@ -17,6 +17,7 @@ third party installs
 
 `npm install -g import-js`
 
+`npm install -g tsun`
 
 # .private
 

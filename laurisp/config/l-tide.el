@@ -17,13 +17,7 @@
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-attr-indent-offset 2)
     (setq web-mode-attr-value-indent-offset 2)
-    (setq lsp-eslint-server-command '("node" (concat (getenv "HOME") "/var/src/vscode-eslint/server/out/eslintServer.js") "--stdio"))
-
-    (define-key (tide-mode-map) (kbd "M-m m r f") 'tide-rename-file)
-
-    (set (make-local-variable 'company-backends)
-         '((company-tide company-files :with company-yasnippet)
-           (company-dabbrev-code company-dabbrev))))
+    (setq lsp-eslint-server-command '("node" (concat (getenv "HOME") "/var/src/vscode-eslint/server/out/eslintServer.js") "--stdio")))
 
 ;; New prefixes for commands
 (spacemacs/declare-prefix-for-mode 'typescript-mode "mf" "format")
@@ -46,7 +40,11 @@
    ;; M-m m r // rename
    (local-set-key (kbd "M-m m r f") 'tide-rename-file)
    ;; M-m m e // errors
-   (local-set-key (kbd "M-m m e p") 'tide-error-at-point)))
+   (local-set-key (kbd "M-m m e p") 'tide-error-at-point)
+   ;; Repl
+   (local-set-key (kbd "C-x C-e") 'ts-send-last-sexp)
+   (local-set-key (kbd "C-c C-b") 'ts-send-buffer)
+   ))
 
 ;; hooks
 (add-hook 'before-save-hook 'tide-format-before-save)
