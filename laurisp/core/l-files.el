@@ -13,26 +13,31 @@
 ;; opening files
 ;;
 
+;;;###autoload
 (defun open-spacemacs-config ()
     "opens .spacemacs file"
     (interactive)
     (find-file "~/.spacemacs"))
 
+;;;###autoload
 (defun open-skhd-config ()
   "opens .skhdrc file"
   (interactive)
   (find-file "~/../.skhdrc"))
 
+;;;###autoload
 (defun open-yabai-config ()
   "opens .yabairc file"
   (interactive)
   (find-file "~/../.yabairc"))
 
+;;;###autoload
 (defun open-zsh-config ()
   "opens .zshrc file"
   (interactive)
   (find-file "~/../.zshrc"))
 
+;;;###autoload
 (defun open-laurisp ()
   "opens laurisp.el file"
   (interactive)
@@ -43,16 +48,17 @@
 ;; inserting on file
 ;;
 
+;;;###autoload
 (defun insert-text-on-point (text)
     "insert text on where cursor stands"
     (insert text))
 
-
+;;;###autoload
 (defun remove-suffix (file)
   "remove suffix of file"
   (replace-regexp-in-string "\\.[a-z]*$" ""  file))
 
-
+;;;###autoload
 (defun insert-text-on-first-empty-line (text current-point)
   ""
   (progn
@@ -62,7 +68,7 @@
     (goto-char (+ current-point (length text)))
     t))
 
-
+;;;###autoload
 (defun new-laurisp-file (name dir)
   "create laurisp file"
   (interactive "sInsert filename: \nDWhere? ")
@@ -71,7 +77,7 @@
     (echo-into file (format ";;\n;; @author Laura Viglioni\n;; 2020\n;; GNU Public License 3.0\n;;\n\n;;\n;; %s related functions\n;;\n\n" name))
     (find-file file)))
 
-
+;;;###autoload
 (defun relative-path (file1 file2)
   ""
   (let* ((path1-list (split-string (file-truename file1) "/"))

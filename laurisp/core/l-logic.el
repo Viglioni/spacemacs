@@ -9,6 +9,7 @@
 ;; Logic related functions
 ;;
 
+;;;###autoload
 (defun bool (x)
   "returns nil/t"
   (not (not x)))

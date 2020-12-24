@@ -9,7 +9,7 @@
 ;;
 
 
-
+;;;###autoload
 (defsubst _compose (function &rest more-functions)
   (cl-reduce (lambda (f g)
                (lexical-let ((f f) (g g))
@@ -24,12 +24,15 @@
                 (arguments arguments))
     (lambda (&rest more) (apply function (append arguments more)))))
 
+;;;###autoload
 (defun -> (arg functions)
   (compose (reverse functions) arg))
 
+;;;###autoload
 (defun apply-curry-on-list (list)
   (apply #'>> list))
 
+;;;###autoload
 (defun compose (functions args)
   (let* ((funcs (seq-map #'eval functions))
          (curried (seq-map #'apply-curry-on-list funcs)))

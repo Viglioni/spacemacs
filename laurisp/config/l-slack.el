@@ -10,11 +10,13 @@
 
 
 
-;; load and start
-(load-file "~/.private/slack-config.el")
 
-;; hooks
-(add-hook 'slack-mode-hook 'emojify-mode)
+(eval-after-load "slack"
+  (lambda ()
+    (progn
+      (add-hook 'slack-mode-hook 'emojify-mode)
+      (load-file "~/.private/slack-config.el")
+      )))
 
-;; keybinds
+
 

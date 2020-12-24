@@ -8,12 +8,18 @@
 ;; org related functions
 ;;
 
-;; disable line count in presentation mode :)
-(add-hook 'epresent-mode-hook (lambda () (linum-mode 0)))
+(eval-after-load "org"
+  (lambda ()
+    (progn
 
-;; show formula not preview when cursor is over
-;; automatically preview a written formula
-(add-hook 'org-mode-hook 'org-fragtog-mode)
+      ;; disable line count in presentation mode :)
+      (add-hook 'epresent-mode-hook (lambda () (linum-mode 0)))
 
-;; highlight latex
-(setq org-highlight-latex-and-related '(latex script entities))
+      ;; show formula not preview when cursor is over
+      ;; automatically preview a written formula
+      (add-hook 'org-mode-hook 'org-fragtog-mode)
+
+      ;; highlight latex
+      (setq org-highlight-latex-and-related '(latex script entities))
+      
+      )))

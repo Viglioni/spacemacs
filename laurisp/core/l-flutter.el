@@ -8,11 +8,13 @@
 ;; flutter related functions
 ;;
 
+;;;###autoload
 (defun flutter-comment (comment-text)
   "insert a comment block"
   (interactive "sEnter the comment: ")
   (insert-text-on-point (format "/*\n * %s\n */\n\n" comment-text)))
 
+;;;###autoload
 (defun flutter-import ()
   "add default import to flutter file"
   (interactive)
@@ -23,6 +25,7 @@
 ;; Templates
 ;;
 
+;;;###autoload
 (defun template-dart-scaffold (component-name title)
   "returns a scaffold component"
   (format "Scaffold %s(context) => Scaffold(
@@ -36,6 +39,7 @@
 ;; interactive templates calls
 ;;
 
+;;;###autoload
 (defun flutter-scaffold (component-name title)
   "inserts a scaffold"
   (interactive "sEnter component name: \nsEnter title: ")
