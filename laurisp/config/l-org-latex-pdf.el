@@ -5,7 +5,12 @@
 ;;
 
 ;;
-;; org related functions
+;; org, latex or pdf related functions
+;;
+
+
+;;
+;; ORG
 ;;
 
 (eval-after-load "org"
@@ -21,5 +26,11 @@
 
       ;; highlight latex
       (setq org-highlight-latex-and-related '(latex script entities))
-      
       )))
+
+
+;;
+;; PDF
+;;
+
+(add-hook 'pdf-view-mode-hook (lambda () (linum-mode 0)))

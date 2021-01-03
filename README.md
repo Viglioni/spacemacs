@@ -2,6 +2,13 @@
 
 Clone this repo in your ~/
 
+# spacemacs leader keys
+The leader keys are set to:
+`M-m --> f19`
+`M-m m --> f17`
+
+This way it is possible to assign them to right-cmd and right-option using [karabiner](https://karabiner-elements.pqrs.org/ ) 
+
 # installs
 third party installs
 
@@ -10,6 +17,18 @@ third party installs
 `brew install ispell`
 
 `brew install aspell`
+
+For pdf tools:
+
+`brew install zlib`
+
+`brew install poppler automake`
+
+For compiling correctly using pdflatex:
+
+`brew link --overwrite ghostscript`
+
+For JS/TS stuff:
 
 `npm i -g tern prettier`
 

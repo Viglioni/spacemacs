@@ -17,15 +17,6 @@
 (global-set-key (kbd "M-p p") 'spotify-status )
 
 
-;; set default spacemacs keybidings 
-(global-set-key (kbd "M-m a m s t") 'spotify-playpause)
-(global-set-key (kbd "M-m a m s n") 'spotify-next)
-(global-set-key (kbd "M-m a m s p") 'spotify-previous)
-(global-set-key (kbd "M-m a m s s") 'helm-spotify-plus) ; search
-
-;; unset default keys
-(global-unset-key (kbd "M-m a m s g"))
-(global-unset-key (kbd "M-m a m s N"))
 
 
 
