@@ -89,7 +89,6 @@ values."
      org-fragtog
      latex-extra
      exec-path-from-shell
-     mocha-snippets
      mocha
      ts-comint
      company-tabnine
