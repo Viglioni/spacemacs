@@ -8,36 +8,85 @@
 ;; tide related functions
 ;;
 
-(defun tide-setup-hook ()
-    (tide-setup)
-    (eldoc-mode)
-    (run-import-js)
-    (tide-hl-identifier-mode +1)
-    (setq web-mode-enable-auto-quoting nil)
-    (setq web-mode-markup-indent-offset 2)
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-attr-indent-offset 2)
-    (setq web-mode-attr-value-indent-offset 2)
-    (setq lsp-eslint-server-command '("node" (concat (getenv "HOME") "/var/src/vscode-eslint/server/out/eslintServer.js") "--stdio"))
-    (set (make-local-variable 'company-backends)
-         '((company-tide company-files :with company-yasnippet)
-           (company-dabbrev-code company-dabbrev))))
 
+
+;;
+;; Keybinds inside tide-mode
+;;
+
+(eval-after-load 'typescript-mode
+  (lambda ()
+    ;; New prefixes for commands
+    (spacemacs/declare-prefix-for-mode 'typescript-mode "me" "errors")
+    (spacemacs/declare-prefix-for-mode 'typescript-mode "mf" "format")
+    ;; format 
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "ff" 'tide-fix)
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "fo" 'tide-organize-imports)
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "f=" 'tide-format)
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "fr" 'tide-refactor)
+    ;; rename
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "rf" 'tide-rename-file)
+    ;; errors
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "ep" 'tide-error-at-point)
+    ))
+
+(eval-after-load 'rjsx-mode
+  (lambda ()
+    ;; New prefixes for commands
+    (spacemacs/declare-prefix-for-mode 'rjsx-mode "me" "errors")
+    (spacemacs/declare-prefix-for-mode 'rjsx-mode "mf" "format")
+    ;; format 
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "ff" 'tide-fix)
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "fo" 'tide-organize-imports)
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "f=" 'tide-format)
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "fr" 'tide-refactor)
+    ;; rename
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "rf" 'tide-rename-file)
+    ;; errors
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "ep" 'tide-error-at-point)
+    ))
+
+(eval-after-load 'web-mode
+  (lambda ()
+    ;; New prefixes for commands
+    (spacemacs/declare-prefix-for-mode 'web-mode "me" "errors")
+    (spacemacs/declare-prefix-for-mode 'web-mode "mf" "format")
+    ;; format 
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "ff" 'tide-fix)
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "fo" 'tide-organize-imports)
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "f=" 'tide-format)
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "fr" 'tide-refactor)
+    ;; rename
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "rf" 'tide-rename-file)
+    ;; errors
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "ep" 'tide-error-at-point)
+    ))
+
+(add-hook
+ 'tide-mode-hook
+ (lambda ()
+   ;; Repl
+   (local-set-key (kbd "C-x C-e") 'ts-send-last-sexp)
+   (local-set-key (kbd "C-c C-b") 'ts-send-buffer)
+   ))
+
+
+;;
 ;; hooks
+;;
 (add-hook 'before-save-hook 'tide-format-before-save)
-(add-hook 'after-save-hook
-          (lambda ()
-            (if (get-process "import-js")
-                (import-js-fix))))
 
 
-;; use rjsx-mode for .js* files except json and use tide with rjsx
+;;
+;; rjsx extra configs
+;;
 (add-to-list 'auto-mode-alist '("\\.js.*$" . rjsx-mode))
 (add-to-list 'auto-mode-alist '("\\.json$" . json-mode))
 (add-hook 'rjsx-mode-hook 'tide-setup-hook)
 
-
+;;
 ;; web-mode extra config
+;;
 (add-hook 'web-mode-hook 'tide-setup-hook
           (lambda () (pcase (file-name-extension buffer-file-name)
                   ("tsx" ('tide-setup-hook))

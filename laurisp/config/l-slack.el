@@ -8,5 +8,15 @@
 ;; slack related functions
 ;;
 
-(load-file "~/.private/slack-config.el")
-(slack-start)
+
+
+
+(eval-after-load "slack"
+  (lambda ()
+    (progn
+      (add-hook 'slack-mode-hook 'emojify-mode)
+      (load-file "~/.private/slack-config.el")
+      )))
+
+
+

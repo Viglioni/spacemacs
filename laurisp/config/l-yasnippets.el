@@ -9,7 +9,7 @@
 ;;
 
 
-(add-to-list 'yas-snippet-dirs "~/laurisp/config/snippets")
+(add-to-list 'yas-snippet-dirs "~/laurisp/snippets")
 
 
 (yas-global-mode 1)

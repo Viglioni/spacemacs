@@ -1,0 +1,30 @@
+# mode tiling (bsb) /  float
+yabai -m config layout bsp
+
+# focus with mouse
+yabai -m window --focus mouse
+
+# padding config
+yabai -m config top_padding    10
+yabai -m config bottom_padding 10
+yabai -m config left_padding   10
+yabai -m config right_padding  10
+yabai -m config window_gap     10
+
+# example: render all unfocused windows with x% opacity
+yabai -m config window_opacity on
+yabai -m config active_window_opacity 1.0
+yabai -m config normal_window_opacity 0.7
+
+# float system preferences
+yabai -m rule --add app="^System Preferences$" manage=off
+yabai -m rule --add app="^Stocks" manage=of
+yabai -m rule --add app="^Reminders" manage=off
+yabai -m rule --add app="^Docker Desktop" manage=off
+yabai -m rule --add app="^Terminal" manage=off
+yabai -m rule --add app="^Calendar" manage=off
+yabai -m rule --add app="^Reminders" manage=off
+yabai -m rule --add app="^Finder" manage=off
+yabai -m rule --add app="^Slack" manage=off
+yabai -m rule --add app="^Telegram" manage=off
+yabai -m rule --add app="^Discord" manage=off

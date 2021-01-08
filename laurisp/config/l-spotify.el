@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;
 ;; @author Laura Viglioni
 ;; 2020
@@ -9,8 +10,13 @@
 ;;
 
 
-(global-set-key (kbd "M-m m u s p") 'spotify-playpause )
-(global-set-key (kbd "M-m m u s f") 'spotify-next )
-(global-set-key (kbd "M-m m u s b") 'spotify-previous )
-(global-set-key (kbd "M-m m u s s") 'helm-spotify-plus ) ; search
+
+;; set alias keybindings
+(which-key-add-key-based-replacements "M-p" "Spotify")
+(global-set-key (kbd "M-p M-p") 'spotify-helper)
+(global-set-key (kbd "M-p p") 'spotify-status )
+
+
+
+
 
