@@ -28,6 +28,7 @@
     (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "rf" 'tide-rename-file)
     ;; errors
     (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "ep" 'tide-error-at-point)
+    (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "en" 'flycheck-next-error)
     ))
 
 (eval-after-load 'rjsx-mode
@@ -44,6 +45,7 @@
     (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "rf" 'tide-rename-file)
     ;; errors
     (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "ep" 'tide-error-at-point)
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode "en" 'flycheck-next-error)
     ))
 
 (eval-after-load 'web-mode
@@ -60,6 +62,7 @@
     (spacemacs/set-leader-keys-for-major-mode 'web-mode "rf" 'tide-rename-file)
     ;; errors
     (spacemacs/set-leader-keys-for-major-mode 'web-mode "ep" 'tide-error-at-point)
+    (spacemacs/set-leader-keys-for-major-mode 'web-mode "en" 'flycheck-next-error)
     ))
 
 (add-hook
