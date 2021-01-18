@@ -1,0 +1,7 @@
+* macOS
+** Tiling
+#+begin_src shell
+brew tap koekeishiya/formulae
+brew install yabai
+brew install skhd
+#+end_src
