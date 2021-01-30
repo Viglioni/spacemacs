@@ -16,7 +16,7 @@
 ;;
 
 ;;;###autoload
-(defun get-org-buffer-name (src-buffer)
+(defun lautex--get-org-buffer-name (src-buffer)
   (replace-regexp-in-string "\\[" "" (nth 2 (split-string src-buffer " "))))
 
 
@@ -27,36 +27,36 @@
 ;;
 
 ;;;###autoload
-(defun insert-lautex-env (env-name)
+(defun lautex--insert-lautex-env (env-name)
   (let ((begin (concat "\\begin{" env-name "}"))
         (end (concat "\\end{" env-name "}")))
     (insert (concat begin "\n\n" end))))
 
-(setq lautex-env-names
+(setq lautex--env-names
       '("theorem" "definition" "remark" "example" "figure" "Table"  "description" "enumerate" "itemize" "list"  "math" "displaymath" "split" "array" "eqnarray" "equation" "equation*" "Matrix" "environments" "Cases" "align" "align*" "alignat" "environments" "center" "flushleft" "flushright" "minipage" "quotation" "quote" "verbatim" "verse" "tabbing" "tabular" "Thebibliography" "Titlepage"))
 
-(setq lautex-srcs
+(setq lautex--helm-env-sources
       (helm-build-sync-source "Environment"
-          :candidates 'lautex-env-names
-          :action 'insert-lautex-env))
+          :candidates 'lautex--env-names
+          :action 'lautex--insert-lautex-env))
 
-(setq lautex-srcs-fallback
+(setq lautex--helm-env-sources-fallback
       (helm-build-dummy-source "Environment"
-        :action 'insert-lautex-env))
+        :action 'lautex--insert-lautex-env))
 
 ;;;###autoload
-(defun org-lautex-env ()
-  "inserts env and opens edit special"
+(defun LauTeX-org-env ()
+  "inserts LaTeX env and opens edit special"
  (interactive)
   (if (eq 'org-mode major-mode)
       (progn
-        (helm :sources '(lautex-srcs lautex-srcs-fallback)) 
+        (helm :sources '(lautex--helm-env-sources lautex--helm-env-sources-fallback)) 
         (org-edit-special)
         (previous-line)
         (spacemacs/indent-region-or-buffer))))
 
 ;;;###autoload
-(defun org-lautex-env-exit ()
+(defun LauTeX-org-env-exit ()
   "exits edit special and toggle latex fragment to image"
   (interactive)
   (org-edit-src-exit)
@@ -64,11 +64,11 @@
   (org-toggle-lautex-fragment))
 
 ;;;###autoload
-(defun org-lautex-preview-env ()
+(defun LauTeX-preview-org-env ()
   "preview on org buffer latex changes in special edit buffer"
   (interactive)
   (let* ((edit-buff (buffer-name))
-         (original-buf (get-org-buffer-name edit-buff))
+         (original-buf (lautex--get-org-buffer-name edit-buff))
          (buffer-exists (bool (get-buffer original-buf))))
     (if buffer-exists
         (progn
@@ -85,37 +85,54 @@
 ;;
 
 ;;;###autoload
-(defun get-label (line)
-  (let* ((without-preffix 
-          (replace-regexp-in-string ".*label\{" "" line)))
-    (replace-regexp-in-string "\}.*" "" without-preffix)))
+(defun lautex--get-label (line)
+  "get string %s in .*\\label{%s}.*"
+  (-> line
+     ((replace-regexp-in-string ".*label\{" "")
+      (replace-regexp-in-string "\}.*" "" ))))
 
 ;;;###autoload
-(defun insert-reference (label)
+(defun lautex--insert-reference (label)
+  "insert \\ref{label} on text"
   (insert (concat "\\ref{" label "}")))
 
 ;;;###autoload
-(defun get-org-file-name ()
+(defun lautex--get-org-file-name ()
+  "If in a edit-special buffer, return the org one,
+   else return the buffer it was called"
   (or (buffer-file-name)
-     (buffer-file-name (get-buffer (get-org-buffer-name (buffer-name))))))
+      (-> (buffer-name)
+         ((lautex--get-org-buffer-name)
+          (get-buffer)
+          (buffer-file-name)))))
 
 ;;;###autoload
-(defun get-candidates ()
-  (let* ((text  (get-string-from-file (get-org-file-name)))
+(defun lautex--get-candidates ()
+  "Get all labels from a org/latex file"
+  (let* ((text  (get-string-from-file (lautex--get-org-file-name)))
          (matches (regex-matches "\\\\label\{.*\}" text)))
-    (seq-map 'get-label matches)))
+    (seq-map 'lautex--get-label matches)))
 
 ;;;###autoload
-(defun buffer-source ()
+(defun lautex--helm-label-source ()
   (helm-build-sync-source "Label Source"
-    :candidates (get-candidates)
-    :action '(lambda (line) (insert-reference (get-label line)))))
+    :candidates (lautex--get-candidates)
+    :action '(lambda (line) (lautex--insert-reference (lautex--get-label line)))))
 
 ;;;###autoload
-(defun lautex-insert-reference ()
+(defun LauTeX-insert-reference ()
   (interactive)
-  (helm :sources (buffer-source)
+  (helm :sources (lautex--helm-label-source)
         :buffer "*helm buffer source*"))
+
+
+;;
+;; Insert libs
+;;
+
+
+
+
 
 
 

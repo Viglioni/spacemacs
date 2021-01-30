@@ -42,8 +42,9 @@
       (spacemacs/declare-prefix-for-mode 'org-mode "\\" "LaTeX")
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\t" 'org-toggle-latex-fragment)
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\b" 'org-beamer-export-to-pdf)
-      (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\e" 'org-latex-env)
+      (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\e" 'LauTeX-org-env)
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\p" 'org-latex-export-to-pdf)
+      (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\r" 'LauTeX-insert-reference)
       ;; bind hide entry
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "hh" 'org-hide-entry)
       )))
@@ -95,6 +96,7 @@
 
 
 (spacemacs/declare-prefix-for-mode 'latex-mode "o" "org-edit-functions")
-(spacemacs/set-leader-keys-for-major-mode 'latex-mode "op" 'org-latex-preview-env)
-(spacemacs/set-leader-keys-for-major-mode 'latex-mode "oe" 'org-latex-env-exit)
+(spacemacs/set-leader-keys-for-major-mode 'latex-mode "op" 'LauTeX-preview-org-env)
+(spacemacs/set-leader-keys-for-major-mode 'latex-mode "oe" 'LauTeX-org-env-exit)
+(spacemacs/set-leader-keys-for-major-mode 'latex-mode "or" 'LauTeX-insert-reference)
 
