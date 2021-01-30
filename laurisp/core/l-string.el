@@ -17,3 +17,22 @@
 (defun file-extension (filename extension)
   "returns filename.extension"
   (concat filename "." extension))
+
+;;;###autoload
+(defun regex-matches (regexp string &optional pos matches)
+  "Returns a list of matches"
+  (let* ((actual-pos (or pos 0))
+         (m-pos (string-match regexp string actual-pos))
+         (match (and m-pos (match-string 0 string))))
+    (if match
+        (rgx regexp string (match-end 0) (append matches (list match)))
+      matches)))
+
+
+;;;###autoload
+(defun get-string-from-file (filePath)
+  "Return filePath's file content in a string"
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+

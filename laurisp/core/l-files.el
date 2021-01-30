@@ -48,10 +48,6 @@
 ;; inserting on file
 ;;
 
-;;;###autoload
-(defun insert-text-on-point (text)
-    "insert text on where cursor stands"
-    (insert text))
 
 ;;;###autoload
 (defun remove-suffix (file)

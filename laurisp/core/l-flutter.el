@@ -12,7 +12,7 @@
 (defun flutter-comment (comment-text)
   "insert a comment block"
   (interactive "sEnter the comment: ")
-  (insert-text-on-point (format "/*\n * %s\n */\n\n" comment-text)))
+  (insert (format "/*\n * %s\n */\n\n" comment-text)))
 
 ;;;###autoload
 (defun flutter-import ()
