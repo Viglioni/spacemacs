@@ -18,25 +18,21 @@
              more-functions
              :initial-value function))
 
-(defsubst >> (function &rest arguments)
-  "Curry a function"
-  (lexical-let ((function function)
-                (arguments arguments))
-    (lambda (&rest more) (apply function (append arguments more)))))
+;;;###autoload
+(defmacro curry (fn &rest initial-args)
+  `(lambda (&rest args)
+     (apply (quote ,fn) (append (quote ,initial-args) args))))
 
 ;;;###autoload
-(defun -> (arg functions)
-  (compose (reverse functions) arg))
+(defmacro compose (&rest fn-list)
+  `(let ((curried-fn (quote ,(seq-map (lambda (x) (seq-concatenate 'list '(curry) x)) fn-list))))
+      (eval (seq-concatenate 'list '(_compose) curried-fn))))
 
 ;;;###autoload
-(defun apply-curry-on-list (list)
-  (apply #'>> list))
+(defmacro -> (arg fn-list)
+  `(funcall (compose ,@(reverse  fn-list)) ,arg))
 
 ;;;###autoload
-(defun compose (functions args)
-  (let* ((funcs (seq-map #'eval functions))
-         (curried (seq-map #'apply-curry-on-list funcs)))
-    (funcall (apply #'_compose curried) args)))
-
-
+(defmacro compose-and-call (fn-list arg)
+  `(funcall (compose ,@fn-list) ,arg))
 
