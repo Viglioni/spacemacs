@@ -21,7 +21,7 @@
 ;;;###autoload
 (defmacro curry (fn &rest initial-args)
   `(lambda (&rest args)
-     (apply (quote ,fn) (append (quote ,initial-args) args))))
+     (apply (quote ,fn) (seq-concatenate 'list (list ,@initial-args) args))))
 
 ;;;###autoload
 (defmacro compose (&rest fn-list)
