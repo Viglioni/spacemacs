@@ -45,6 +45,7 @@
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\e" 'LauTeX-org-env)
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\p" 'org-latex-export-to-pdf)
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\r" 'LauTeX-insert-reference)
+      (spacemacs/set-leader-keys-for-major-mode 'org-mode "\\c" 'LauTeX-insert-citation)
       ;; bind hide entry
       (spacemacs/set-leader-keys-for-major-mode 'org-mode "hh" 'org-hide-entry)
       )))
@@ -63,7 +64,7 @@
    (local-set-key (kbd "C-<right>") 'org-demote-subtree)
    ;; force line breaks
    (spacemacs/toggle-visual-line-navigation-on)
- (setq-local word-wrap nil)
+   (setq-local word-wrap nil)
    ))
 
 
