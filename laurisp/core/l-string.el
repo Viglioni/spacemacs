@@ -36,3 +36,9 @@
     (insert-file-contents filePath)
     (buffer-string)))
 
+;;;###autoload
+(defun string-from-file (file-path)
+  "Return file-path's file content."
+  (with-temp-buffer
+    (insert-file-contents file-path)
+    (buffer-string)))
