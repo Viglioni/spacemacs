@@ -193,13 +193,13 @@
 (defun lautex--bib-titles (file)
   (let* ((file-content (string-from-file file))
          (titles (regex-matches "title = .*" file-content)))
-    (seq-map 'lautex--get-info titles)))
+    (seq-map 'lautex--bib-info titles)))
 
 ;;;###autoload
 (defun lautex--bib-years (file)
   (let* ((file-content (string-from-file file))
          (titles (regex-matches "year = .*" file-content)))
-    (seq-map 'lautex--get-info titles)))
+    (seq-map 'lautex--bib-info titles)))
 
 
 ;;;###autoload

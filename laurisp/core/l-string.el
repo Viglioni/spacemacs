@@ -25,7 +25,7 @@
          (m-pos (string-match regexp string actual-pos))
          (match (and m-pos (match-string 0 string))))
     (if match
-        (rgx regexp string (match-end 0) (append matches (list match)))
+        (regex-matches regexp string (match-end 0) (append matches (list match)))
       matches)))
 
 
