@@ -52,7 +52,7 @@
 ;;
 
 (defvar lautex--env-names
-  '("theorem" "definition" "remark" "example" "figure" "Table"  "description" "enumerate" "itemize" "list"  "math" "displaymath" "split" "array" "eqnarray" "equation" "equation*" "Matrix" "environments" "Cases" "align" "align*" "alignat" "environments" "center" "flushleft" "flushright" "minipage" "quotation" "quote" "verbatim" "verse" "tabbing" "tabular" "Thebibliography" "Titlepage"))
+  '("text" "theorem" "definition" "remark" "example" "figure" "Table"  "description" "enumerate" "itemize" "list"  "math" "displaymath" "split" "array" "eqnarray" "equation" "equation*" "Matrix" "environments" "Cases" "align" "align*" "alignat" "environments" "center" "flushleft" "flushright" "minipage" "quotation" "quote" "verbatim" "verse" "tabbing" "tabular" "Thebibliography" "Titlepage"))
 
 ;;;###autoload
 (defun lautex--insert-env (env-name)
@@ -87,8 +87,8 @@
   "exits edit special and toggle latex fragment to image"
   (interactive)
   (org-edit-src-exit)
-  (org-clear-lautex-preview (point) (inc (point)))
-  (org-toggle-lautex-fragment))
+  (org-clear-latex-preview (point) (inc (point)))
+  (org-toggle-latex-fragment))
 
 ;;;###autoload
 (defun LauTeX-preview-org-env ()
@@ -157,7 +157,7 @@
 ;;;###autoload
 (defun lautex--insert-citation (citation)
   "insert \\ref{citation} on text"
-  (lautex--insert-command "ref" citation))
+  (lautex--insert-command "cite" citation))
 
 ;;;###autoload
 (defun lautex--get-bib-files ()
