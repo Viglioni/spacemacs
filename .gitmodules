@@ -1,0 +1,3 @@
+[submodule "laurisp"]
+	path = laurisp
+	url = https://github.com/Viglioni/laurisp
