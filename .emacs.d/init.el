@@ -33,5 +33,5 @@
   (require 'server)
   (unless (server-running-p) (server-start)))
 
-(require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
-(cask-initialize)
+;; (require 'cask "/usr/local/share/emacs/site-lisp/cask/cask.el")
+;; (cask-initialize)
