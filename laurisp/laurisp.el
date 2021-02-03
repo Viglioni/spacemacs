@@ -13,6 +13,12 @@
 (setq lazy-configs-dir "~/laurisp/lazy-config")
 
 ;;
+;; global keys
+;;
+
+(global-set-key (kbd "<f19> <f19>") 'helm-M-x) 
+
+;;
 ;; import all laurisp files
 ;;
 (defun import-files (dir)
@@ -28,7 +34,7 @@
 (import-files "core")
 (import-files "lazy-funcs")
 (import-files "config")
-
+(load "~/laurisp/external/emacs-grammarly/emacs-grammarly.el")
 
 (provide 'laurisp)
 

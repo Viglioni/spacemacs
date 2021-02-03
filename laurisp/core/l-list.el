@@ -37,18 +37,15 @@
 ;;;###autoload
 (defun inc (n) "returns n+1" (+ 1 n))
 
-;;;###autoload
-(defun l-list--zip-reduce (acc element list2) ""
-       )
 
 ;;;###autoload
 (defun ordered-by-length (list-of-lists)
   "return a list of lists ordered by length"
-  (sort list-of-lists (lambda (a b) "" (< (length a) (length b)))))
+  (sort list-of-lists (lambda (a b) (< (length a) (length b)))))
 
 ;;;###autoload
 (defun zip (list1 list2 &optional acc)
-  ""
+  "zips two lists"
   (if (not (or list1 list2))
       acc
     (zip (tail list1) (tail list2) (append acc (list (list (head list1) (head list2)))))))

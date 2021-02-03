@@ -48,10 +48,6 @@
 ;; inserting on file
 ;;
 
-;;;###autoload
-(defun insert-text-on-point (text)
-    "insert text on where cursor stands"
-    (insert text))
 
 ;;;###autoload
 (defun remove-suffix (file)
@@ -74,7 +70,7 @@
   (interactive "sInsert filename: \nDWhere? ")
   (let* ((filename (concat "l-" name ".el"))
          (file (touch filename dir)))
-    (echo-into file (format ";;\n;; @author Laura Viglioni\n;; 2020\n;; GNU Public License 3.0\n;;\n\n;;\n;; %s related functions\n;;\n\n" name))
+    (echo-into file (format ";;\n;; @author Laura Viglioni\n;; 2021\n;; GNU Public License 3.0\n;;\n\n;;\n;; %s related functions\n;;\n\n" name))
     (find-file file)))
 
 ;;;###autoload
