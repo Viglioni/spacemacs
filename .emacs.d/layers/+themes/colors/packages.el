@@ -1,6 +1,6 @@
 ;;; packages.el --- Colors Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -44,12 +44,11 @@
 
 (defun colors/init-color-identifiers-mode ()
   (use-package color-identifiers-mode
-    :commands color-identifiers-mode
     :defer t
     :init
     (progn
       (when (eq 'variables colors-colorize-identifiers)
-        (global-color-identifiers-mode))
+        (add-hook 'prog-mode-hook 'color-identifiers-mode))
       (spacemacs/declare-prefix "Ci" "colors-identifiers")
       (spacemacs|add-toggle color-identifiers-mode
         :status color-identifiers-mode
@@ -78,8 +77,9 @@
     :init
     (progn
       (setq rainbow-identifiers-choose-face-function 'rainbow-identifiers-cie-l*a*b*-choose-face
-            rainbow-identifiers-cie-l*a*b*-saturation 100
-            rainbow-identifiers-cie-l*a*b*-lightness 40
+            ;; defaults to use before we've loaded per-theme settings
+            rainbow-identifiers-cie-l*a*b*-saturation colors-default-rainbow-identifiers-sat
+            rainbow-identifiers-cie-l*a*b*-lightness colors-default-rainbow-identifiers-light
             ;; override theme faces
             rainbow-identifiers-faces-to-override '(highlight-quoted-symbol
                                                     font-lock-keyword-face

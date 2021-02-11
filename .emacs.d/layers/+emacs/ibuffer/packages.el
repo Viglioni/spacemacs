@@ -1,6 +1,6 @@
 ;;; packages.el --- ibuffer Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Aleksandr Guljajev <aleksandr.guljajev@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,12 +15,12 @@
         ibuffer-projectile
         ))
 
-(defun ibuffer/init-ibuffer()
+(defun ibuffer/init-ibuffer ()
   (use-package ibuffer
     :defer t
     :init
     (progn
-      (spacemacs/set-leader-keys "bB" 'ibuffer)
+      (spacemacs/set-leader-keys "bI" 'ibuffer)
       (global-set-key (kbd "C-x C-b") 'ibuffer)
       (defun spacemacs//ibuffer-group-by-modes ()
         "Group buffers by modes."
@@ -36,9 +36,11 @@
       :bindings
       "gr" 'ibuffer-update
       "gj" 'ibuffer-forward-filter-group
-      "gk" 'ibuffer-backward-filter-group)))
+      "]"  'ibuffer-forward-filter-group
+      "gk" 'ibuffer-backward-filter-group
+      "["  'ibuffer-backward-filter-group)))
 
-(defun ibuffer/init-ibuffer-projectile()
+(defun ibuffer/init-ibuffer-projectile ()
     (use-package ibuffer-projectile
       :defer t
       :init

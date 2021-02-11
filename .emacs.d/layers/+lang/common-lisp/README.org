@@ -1,22 +1,33 @@
 #+TITLE: Common Lisp layer
 
+#+TAGS: dsl|layer|lisp|programming
+
 [[file:img/slime.png]]
 
-* Table of Contents                                         :TOC_4_gh:noexport:
- - [[#description][Description]]
- - [[#install][Install]]
- - [[#key-bindings][Key Bindings]]
-   - [[#working-with-lisp-files-barfage-slurpage--more][Working with lisp files (barfage, slurpage & more)]]
-   - [[#leader][Leader]]
-     - [[#help][Help]]
-     - [[#evaluation][Evaluation]]
-     - [[#repl][REPL]]
-     - [[#compile][Compile]]
-     - [[#navigation][Navigation]]
-     - [[#macroexpansion][Macroexpansion]]
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#install][Install]]
+- [[#structuraly-safe-editing][Structuraly safe editing]]
+- [[#key-bindings][Key bindings]]
+  - [[#working-with-lisp-files-barfage-slurpage--more][Working with lisp files (barfage, slurpage & more)]]
+  - [[#leader][Leader]]
+    - [[#help][Help]]
+    - [[#evaluation][Evaluation]]
+    - [[#repl][REPL]]
+    - [[#compile][Compile]]
+    - [[#navigation][Navigation]]
+    - [[#macroexpansion][Macroexpansion]]
 
 * Description
-A Spacemacs contribution layer providing Common Lisp support via [[https://github.com/slime/slime][SLIME]].
+This layer provides support for Common Lisp to Spacemacs.
+
+** Features:
+- Syntax highlighting
+- Auto-completion using company
+- Repl support via [[https://github.com/slime/slime][SLIME]]
+- Support for specific lisp navigation styles via =common-lisp-mode=
+- Support for [[http://www.sbcl.org/][sbcl]] backend or any other =common-lisp= implementation
 
 * Install
 If you have previously installed slime in any other way, it is recommended that
@@ -36,9 +47,31 @@ of Common Lisp, you can specify it in your =~/.spacemacs=
     (setq inferior-lisp-program "/path/to/your/lisp"))
 #+END_SRC
 
-* Key Bindings
+* Structuraly safe editing
+This layer adds support for =evil-cleverparens= which allows to safely edit
+lisp code by keeping the s-expressions balanced.
+
+By default this mode is not activated. You can turn it on locally on the active
+buffer with ~SPC m T s~ (=s= for safe).
+
+To turn it on automatically for all =common-lisp= buffers call the following
+function in your =dotspacemacs/user-config= function:
+
+#+BEGIN_SRC emacs-lisp
+  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-common-lisp-mode)
+#+END_SRC
+
+or to enable it for all supported modes:
+
+#+BEGIN_SRC emacs-lisp
+  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hooks)
+#+END_SRC
+
+When enabled the symbol =🆂= should be displayed in the mode-line.
+
+* Key bindings
 ** Working with lisp files (barfage, slurpage & more)
-Spacemacs comes with a special ~lisp-state~ for working with lisp code that
+Spacemacs comes with a special =lisp-state= for working with lisp code that
 supports slurpage, barfage and more tools you'll likely want when working with
 lisp.
 
@@ -48,7 +81,7 @@ As this state works the same for all files, the documentation is in global
 ** Leader
 *** Help
 
-| Key Binding | Description                                             |
+| Key binding | Description                                             |
 |-------------+---------------------------------------------------------|
 | ~SPC m h a~ | SLIME apropos                                           |
 | ~SPC m h d~ | Disassemble symbol at point                             |
@@ -66,17 +99,21 @@ As this state works the same for all files, the documentation is in global
 
 *** Evaluation
 
-| Key Binding | Description                     |
-|-------------+---------------------------------|
-| ~SPC m e b~ | Evaluate buffer                 |
-| ~SPC m e e~ | Evaluate last expression        |
-| ~SPC m e f~ | Evaluate top level s-expression |
-| ~SPC m e F~ | Undefine the function at point  |
-| ~SPC m e r~ | Evaluate region                 |
+| Key binding | Description                                       |
+|-------------+---------------------------------------------------|
+| ~SPC m e b~ | Evaluate buffer                                   |
+| ~SPC m e c~ | Evaluate parent sexp of current form around point |
+| ~SPC m e C~ | Evaluate current =def= or =set= form around point |
+| ~SPC m e e~ | Evaluate last sexp                                |
+| ~SPC m e l~ | Go to end of line and evaluate last sexp          |
+| ~SPC m e f~ | Evaluate top level sexp                           |
+| ~SPC m e F~ | Undefine the function at point                    |
+| ~SPC m e r~ | Evaluate region                                   |
+| ~SPC m e s~ | Evaluate symbol around point                      |
 
 *** REPL
 
-| Key Binding | Description                      |
+| Key binding | Description                      |
 |-------------+----------------------------------|
 | ~SPC m s i~ | Start an inferior process        |
 | ~SPC m s e~ | Evaluate last expression in REPL |
@@ -84,7 +121,7 @@ As this state works the same for all files, the documentation is in global
 
 *** Compile
 
-| Key Binding | Description              |
+| Key binding | Description              |
 |-------------+--------------------------|
 | ~SPC m c c~ | Compile file             |
 | ~SPC m c C~ | Compile file and load it |
@@ -95,16 +132,16 @@ As this state works the same for all files, the documentation is in global
 
 *** Navigation
 
-| Key Binding               | Description        |
-|---------------------------+--------------------|
-| ~SPC m g g~               | Go to definition   |
-| ~SPC m g b~               | Go back            |
-| ~SPC m g n~               | Next note          |
-| ~SPC m g N~ or ~SPC m g p | Previous note      |
+| Key binding               | Description      |
+|---------------------------+------------------|
+| ~SPC m g g~               | Go to definition |
+| ~SPC m g b~               | Go back          |
+| ~SPC m g n~               | Next note        |
+| ~SPC m g N~ or ~SPC m g p | Previous note    |
 
 *** Macroexpansion
 
-| Key Binding | Description                                   |
+| Key binding | Description                                   |
 |-------------+-----------------------------------------------|
 | ~SPC m m a~ | Macroexpand the expression at point completly |
 | ~SPC m m o~ | Macroexpand the expression at point once      |

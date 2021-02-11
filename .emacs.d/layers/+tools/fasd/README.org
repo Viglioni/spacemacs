@@ -1,18 +1,23 @@
 #+TITLE: fasd layer
 
-* Table of Contents                                         :TOC_4_gh:noexport:
- - [[#description][Description]]
- - [[#install][Install]]
-   - [[#layer][Layer]]
-   - [[#fasd][fasd]]
- - [[#keybindings][Keybindings]]
+#+TAGS: layer|tool
+
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#install][Install]]
+  - [[#layer][Layer]]
+  - [[#fasd][fasd]]
+- [[#comment][Comment]]
+- [[#key-bindings][Key bindings]]
 
 * Description
+This layer integrates the [[https://github.com/clvv/fasd][fasd]] command line tool into Spacemacs.
 
-This layer adds integration of [[https://github.com/clvv/fasd][fasd]] which is a command line tool
-to quickly jump between locations in a POSIX shell.
-
-The integration is implemented in the package [[https://github.com/steckerhalter/emacs-fasd][emacs-fasd]].
+** Features:
+- Adds easy shortcuts to reference recent files and directories.
+- Provides =fasd= with recent open file lists from Emacs.
+- Allows to filter =fasd= results with =helm= or =ivy=.
 
 * Install
 ** Layer
@@ -24,15 +29,22 @@ file.
 [[https://github.com/clvv/fasd][fasd]] must be installed on your system. The general installation
 instructions can be found in the repository [[https://github.com/clvv/fasd#install][README]]
 
-On OS X, it can be installed via [[https://github.com/Homebrew/homebrew][homebrew]]:
+On macOS, it can be installed via [[https://github.com/Homebrew/legacy-homebrew][homebrew]]:
 
 #+BEGIN_SRC sh
   $ brew install fasd
 #+END_SRC
 
-* Keybindings
+* Comment
+The fasd package has been updated to support Ivy actions (~M-o~). This layer
+adds an Ivy action to start a deep search in a directory
+(~spacemacs/search-auto~) from the fasd results. After the fasd query,
+instead of enter, type ~M-o~ on some directory then press ~s~ to start a
+deep search in that directory.
 
-| Key Binding | Description                        |
+* Key bindings
+
+| Key binding | Description                        |
 |-------------+------------------------------------|
 | ~SPC f a s~ | find a file or directory with fasd |
 | ~SPC f a d~ | find a directory with fasd         |

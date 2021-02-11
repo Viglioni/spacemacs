@@ -1,6 +1,6 @@
 ;;; core-use-package-ext.el --- Spacemacs Core File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -18,7 +18,7 @@
 configuration.
 
 In order to use this macro the variable `use-package-inject-hooks'
-must be non-nil.
+must be non-nil. If it is not a warning will be issued.
 
 This is useful in the dotfile to override the default configuration
 of a package.
@@ -39,7 +39,7 @@ override lazy-loaded settings."
   (let ((name-symbol (if (stringp name) (intern name) name))
         (expanded-forms '()))
     (dolist (keyword spacemacs--use-package-add-hook-keywords)
-      (let ((body (spacemacs/mplist-get plist keyword)))
+      (let ((body (spacemacs/mplist-get-values plist keyword)))
         (when body
           (let ((hook (intern (format "use-package--%S--%s-hook"
                                       name-symbol

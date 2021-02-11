@@ -1,6 +1,6 @@
 ;;; layers.el --- react Layer layers File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Andrea Moretti <axyzxp@gmail.com>
 ;; URL: https://github.com/axyz
@@ -9,4 +9,4 @@
 ;;
 ;;; License: GPLv3
 
-(configuration-layer/declare-layers '(html javascript))
+(configuration-layer/declare-layer-dependencies '(javascript node prettier web-beautify))

@@ -1,23 +1,25 @@
 #+TITLE: Chrome layer
 
+#+TAGS: layer|tool
+
 [[file:img/chrome.png]]
 
-* Table of Contents                                         :TOC_4_gh:noexport:
- - [[#description][Description]]
-   - [[#features][Features]]
- - [[#install][Install]]
-   - [[#layer][Layer]]
-   - [[#chrome-extension][Chrome extension]]
- - [[#configuration][Configuration]]
- - [[#key-bindings][Key bindings]]
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#install][Install]]
+  - [[#layer][Layer]]
+  - [[#chrome-extension][Chrome extension]]
+- [[#configuration][Configuration]]
+- [[#key-bindings][Key bindings]]
 
 * Description
 This layer provides some integration with the Google Chrome browser.
 
-** Features
-- Edit text boxes with Emacs using [[http://melpa.org/#/edit-server][edit-server]]
+** Features:
+- Edit text boxes with Emacs using [[https://github.com/stsquad/emacs_chrome][edit-server]]
 - Write markdown in Emacs and realtime show in chrome using [[https://github.com/mola-T/flymd][flymd]]
-
+- gmail message mode uses standard markdown key bindings
 
 * Install
 ** Layer
@@ -26,7 +28,7 @@ add =chrome= to the existing =dotspacemacs-configuration-layers= list in this
 file.
 
 ** Chrome extension
-[[http://melpa.org/#/edit-server][edit-server]] is a server that responds to edit requests sent Chrome via the
+[[https://github.com/stsquad/emacs_chrome][edit-server]] is a server that responds to edit requests sent Chrome via the
 Google Chrome extension [[https://chrome.google.com/webstore/detail/edit-with-emacs/ljobjlafonikaiipfkggjbhkghgicgoh][Edit with Emacs]]. You have to install this extension.
 
 More information can be found on [[http://www.emacswiki.org/emacs/Edit_with_Emacs][Emacs Wiki]].
@@ -59,7 +61,7 @@ If you want Emacs to switch focus to Chrome after done editing, you can utilize
 Emacs cannot control focus of windows for external apps, so you need to use some
 sort of command line window manager like =wmctrl=.
 
-The following example works on OS X:
+The following example works on macOS:
 
 #+BEGIN_SRC emacs-lisp
   (add-hook 'edit-server-done-hook (lambda () (shell-command "open -a \"Google Chrome\"")))
@@ -67,8 +69,9 @@ The following example works on OS X:
 
 * Key bindings
 
-| Key Binding | Description |
+| Key binding | Description |
 |-------------+-------------|
-| ~SPC a F~   | flymd-flyit |
+| ~SPC a t c~ | flymd-flyit |
 
 *Note:* You need to kill all google chrome process before using =flymd-flyit=.
+For details, see the upstream [[https://github.com/mola-T/flymd/blob/master/browser.md][flymd browser compatibility notes]].

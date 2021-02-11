@@ -1,6 +1,6 @@
-;;; core-load-paths.el --- Spacemacs Core File
+;;; core-load-paths.el --- Spacemacs Core File  -*- no-byte-compile: t -*-
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -22,23 +22,18 @@
 (defconst spacemacs-core-directory
   (expand-file-name (concat spacemacs-start-directory "core/"))
   "Spacemacs core directory.")
+(defconst spacemacs-private-directory
+  (expand-file-name (concat spacemacs-start-directory "private/"))
+  "Spacemacs private directory.")
 (defconst spacemacs-info-directory
   (expand-file-name (concat spacemacs-core-directory "info/"))
   "Spacemacs info files directory")
 (defconst spacemacs-release-notes-directory
   (expand-file-name (concat spacemacs-info-directory "release-notes/"))
   "Spacemacs release notes directory")
-(defconst lauremacs-home "~/")
-(defconst laurisp-dir (concat lauremacs-home "laurisp/"))
-(defconst laurisp (concat laurisp-dir "laurisp.el"))
-(defconst lauremacs-banner-directory
-  (expand-file-name (concat lauremacs-home "banners/"))
-  "Lauremacs banners directory.")
-(defconst spacemacs-banner-directory lauremacs-banner-directory)
-(defconst lauremacs-banner-gif-dir
-  (expand-file-name (concat lauremacs-banner-directory "gif/")))
-(defconst lauremacs-banner-gif-fridays
-  (expand-file-name (concat lauremacs-banner-gif-dir "fridays/")))
+(defconst spacemacs-banner-directory
+  (expand-file-name (concat spacemacs-core-directory "banners/"))
+  "Spacemacs banners directory.")
 (defconst spacemacs-banner-official-png
   (expand-file-name (concat spacemacs-banner-directory "img/spacemacs.png"))
   "Spacemacs official banner image.")
@@ -82,6 +77,7 @@
         ,spacemacs-core-directory
         ,(concat spacemacs-core-directory "libs/")
         ,(concat spacemacs-core-directory "libs/spacemacs-theme/")
+        ,(concat spacemacs-core-directory "libs/forks/")
         ;; ,(concat spacemacs-core-directory "aprilfool/")
         ))
 

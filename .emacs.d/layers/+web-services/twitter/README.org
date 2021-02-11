@@ -1,18 +1,20 @@
-#+TITLE: Twitter contribution layer for Spacemacs
+#+TITLE: Twitter layer
+
+#+TAGS: layer|web service
 
 [[file:img/twitter.png]]
 
-* Table of Contents                                                     :TOC_4_gh:noexport:
- - [[#description][Description]]
- - [[#features][Features]]
- - [[#install][Install]]
- - [[#configuration][Configuration]]
- - [[#key-bindings][Key Bindings]]
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#install][Install]]
+- [[#configuration][Configuration]]
+- [[#key-bindings][Key bindings]]
 
 * Description
 This layer adds Twitter support to Spacemacs via the package [[https://github.com/hayamiz/twittering-mode][twittering-mode]].
 
-* Features
+** Features:
 - Activities on Twitter
   - Viewing various timelines
     - Home timeline
@@ -46,10 +48,11 @@ You can authenticate easily via a PIN number, or you can use GnuPG by setting
 the variable =twittering-use-master-password= to =t= in the =user-config=
 function of your dotfile.
 
-* Key Bindings
+* Key bindings
 
-| Key Binding | Description                              |
+| Key binding | Description                              |
 |-------------+------------------------------------------|
+| ~SPC a w t~ | Open twitter buffer                      |
 | ~?~         | Open/Quit transient state                |
 | ~/~         | Search                                   |
 | ~a~         | Toggle auto-refresh                      |

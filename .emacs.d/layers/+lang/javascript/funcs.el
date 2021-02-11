@@ -1,6 +1,6 @@
 ;;; funcs.el --- Javascript Layer functions File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Muneeb Shaikh <muneeb@reversehack.in>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -10,19 +10,81 @@
 ;;; License: GPLv3
 
 
+;; backend
+
+(defun spacemacs//javascript-backend ()
+  "Returns selected backend."
+  (if javascript-backend
+      javascript-backend
+    (cond
+     ((configuration-layer/layer-used-p 'lsp) 'lsp)
+     (t 'tern))))
+
+(defun spacemacs//javascript-setup-backend ()
+  "Conditionally setup javascript backend."
+  (pcase (spacemacs//javascript-backend)
+    (`tern (spacemacs//javascript-setup-tern))
+    (`tide (spacemacs//tide-setup))
+    (`lsp (spacemacs//javascript-setup-lsp))))
+
+(defun spacemacs//javascript-setup-company ()
+  "Conditionally setup company based on backend."
+  (pcase (spacemacs//javascript-backend)
+    (`tide (spacemacs//tide-setup-company 'js2-mode))))
+
+(defun spacemacs//javascript-setup-dap ()
+  "Conditionally setup elixir DAP integration."
+  ;; currently DAP is only available using LSP
+  (pcase (spacemacs//javascript-backend)
+    (`lsp (spacemacs//javascript-setup-lsp-dap))))
+
+(defun spacemacs//javascript-setup-next-error-fn ()
+  "If the `syntax-checking' layer is enabled, then disable `js2-mode''s
+`next-error-function', and let `flycheck' handle any errors."
+  (when (configuration-layer/layer-used-p 'syntax-checking)
+    (setq-local next-error-function nil)))
+
+;; lsp
+
+(defun spacemacs//javascript-setup-lsp ()
+  "Setup lsp backend."
+  (if (configuration-layer/layer-used-p 'lsp)
+      (progn
+        (when (not javascript-lsp-linter)
+          (setq-local lsp-diagnostics-provider :none))
+        (lsp))
+    (message (concat "`lsp' layer is not installed, "
+                     "please add `lsp' layer to your dotfile."))))
+
+(defun spacemacs//javascript-setup-lsp-dap ()
+  "Setup DAP integration."
+  (require 'dap-firefox)
+  (require 'dap-chrome))
+
+
+;; tern
+(defun spacemacs//javascript-setup-tern ()
+  (if (configuration-layer/layer-used-p 'tern)
+      (when (locate-file "tern" exec-path)
+        (spacemacs/tern-setup-tern))
+    (message (concat "Tern was configured as the javascript backend but "
+                     "the `tern' layer is not present in your `.spacemacs'!"))))
+
+
 ;; js-doc
 
 (defun spacemacs/js-doc-require ()
   "Lazy load js-doc"
   (require 'js-doc))
-(add-hook 'js2-mode-hook 'spacemacs/js-doc-require)
 
 (defun spacemacs/js-doc-set-key-bindings (mode)
   "Setup the key bindings for `js2-doc' for the given MODE."
   (spacemacs/declare-prefix-for-mode mode "mrd" "documentation")
   (spacemacs/set-leader-keys-for-major-mode mode
     "rdb" 'js-doc-insert-file-doc
-    "rdf" 'js-doc-insert-function-doc
+    "rdf" (if (configuration-layer/package-used-p 'yasnippet)
+              'js-doc-insert-function-doc-snippet
+            'js-doc-insert-function-doc)
     "rdt" 'js-doc-insert-tag
     "rdh" 'js-doc-describe-tag))
 
@@ -31,17 +93,6 @@
 (defun spacemacs/js2-refactor-require ()
   "Lazy load js2-refactor"
   (require 'js2-refactor))
-
-
-;; coffee
-
-(defun javascript/coffee-indent ()
-  (if (coffee-line-wants-indent)
-      ;; We need to insert an additional tab because
-      ;; the last line was special.
-      (coffee-insert-spaces (+ (coffee-previous-indent) coffee-tab-width))
-    ;; otherwise keep at the same indentation level
-    (coffee-insert-spaces (coffee-previous-indent))))
 
 
 ;; skewer
@@ -79,22 +130,23 @@
   (evil-insert-state))
 
 
-;; tern
+;; Others
 
-(defun spacemacs//set-tern-key-bindings (mode)
-  "Set the key bindings for tern and the given MODE."
-  (add-to-list (intern (format "spacemacs-jump-handlers-%S" mode))
-            '(tern-find-definition :async t))
-  (spacemacs/set-leader-keys-for-major-mode mode
-    "rrV" 'tern-rename-variable
-    "hd" 'tern-get-docs
-    "gG" 'tern-find-definition-by-name
-    (kbd "C-g") 'tern-pop-find-definition
-    "ht" 'tern-get-type))
+(defun spacemacs//javascript-setup-checkers ()
+  (when-let* ((found (executable-find "eslint_d")))
+    (set (make-local-variable 'flycheck-javascript-eslint-executable) found)))
 
-(defun spacemacs//tern-detect ()
-  "Detect tern binary and warn if not found."
-  (let ((found (executable-find "tern")))
-    (unless found
-      (spacemacs-buffer/warning "tern binary not found!"))
-    found))
+(defun spacemacs/javascript-format ()
+  "Call formatting tool specified in `javascript-fmt-tool'."
+  (interactive)
+  (cond
+   ((eq javascript-fmt-tool 'prettier)
+    (call-interactively 'prettier-js))
+   ((eq javascript-fmt-tool 'web-beautify)
+    (call-interactively 'web-beautify-js))
+   (t (error (concat "%s isn't valid javascript-fmt-tool value."
+                     " It should be 'web-beutify or 'prettier.")
+             (symbol-name javascript-fmt-tool)))))
+
+(defun spacemacs/javascript-fmt-before-save-hook ()
+  (add-hook 'before-save-hook 'spacemacs/javascript-format t t))

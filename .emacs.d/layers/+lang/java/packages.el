@@ -1,6 +1,6 @@
 ;;; packages.el --- Java Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Lukasz Klich <klich.lukasz@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,155 +9,193 @@
 ;;
 ;;; License: GPLv3
 
-(setq java-packages
-      '(
-        company
-        (company-emacs-eclim :toggle (configuration-layer/package-usedp 'company))
-        eclim
-        ggtags
-        helm-gtags
-        (java-mode :location built-in)
-        ))
+(defconst java-packages
+  '(
+    company
+    dap-mode
+    flycheck
+    ggtags
+    counsel-gtags
+    helm-gtags
+    (java-mode :location built-in)
+    maven-test-mode
+    (meghanada :toggle (not (version< emacs-version "25.1")))
+    mvn
+    (lsp-java :requires lsp-mode)
+    org
+    smartparens))
 
 (defun java/post-init-company ()
-  (spacemacs|add-company-hook java-mode))
+  (add-hook 'java-mode-local-vars-hook #'spacemacs//java-setup-company))
 
-(defun java/init-company-emacs-eclim ()
-  (use-package company-emacs-eclim
-    :defer t
-    :init (push 'company-emacs-eclim company-backends-java-mode)))
+(defun java/pre-init-dap-mode ()
+  (pcase (spacemacs//java-backend)
+    (`lsp (add-to-list 'spacemacs--dap-supported-modes 'java-mode)))
+  (add-hook 'java-mode-local-vars-hook #'spacemacs//java-setup-dap))
 
-(defun java/init-eclim ()
-  (use-package eclim
-    :defer t
-    :init
-    (progn
-      (add-hook 'java-mode-hook 'eclim-mode)
-      (add-to-list 'spacemacs-jump-handlers-java-mode 'eclim-java-find-declaration))
-    :config
-    (progn
-      (spacemacs|hide-lighter eclim-mode)
-      (require 'eclimd)
-      (setq help-at-pt-display-when-idle t
-            help-at-pt-timer-delay 0.1)
-      (help-at-pt-set-timer)
-
-      (add-to-list 'minor-mode-alist
-                   '(eclim-mode (:eval (eclim-modeline-string))))
-
-      (evil-define-key 'insert java-mode-map
-        (kbd ".") 'spacemacs/java-completing-dot
-        (kbd ":") 'spacemacs/java-completing-double-colon
-        (kbd "M-.") 'eclim-java-find-declaration
-        (kbd "M-,") 'pop-tag-mark
-        (kbd "M-<mouse-3>") 'eclim-java-find-declaration
-        (kbd "<mouse-8>") 'pop-tag-mark)
-
-      (evil-define-key 'normal java-mode-map
-        (kbd "M-.") 'eclim-java-find-declaration
-        (kbd "M-,") 'pop-tag-mark
-        (kbd "M-<mouse-3>") 'eclim-java-find-declaration
-        (kbd "<mouse-8>") 'pop-tag-mark)
-
-      (evil-define-key 'normal eclim-problems-mode-map
-        (kbd "a") 'eclim-problems-show-all
-        (kbd "e") 'eclim-problems-show-errors
-        (kbd "g") 'eclim-problems-buffer-refresh
-        (kbd "q") 'eclim-quit-window
-        (kbd "w") 'eclim-problems-show-warnings
-        (kbd "f") 'eclim-problems-toggle-filefilter
-        (kbd "c") 'eclim-problems-correct
-        (kbd "RET") 'eclim-problems-open-current)
-
-      (evil-define-key 'normal eclim-project-mode-map
-        (kbd "N") 'eclim-project-create
-        (kbd "m") 'eclim-project-mark-current
-        (kbd "M") 'eclim-project-mark-all
-        (kbd "u") 'eclim-project-unmark-current
-        (kbd "U") 'eclim-project-unmark-all
-        (kbd "o") 'eclim-project-open
-        (kbd "c") 'eclim-project-close
-        (kbd "i") 'eclim-project-info-mode
-        (kbd "I") 'eclim-project-import
-        (kbd "RET") 'eclim-project-goto
-        (kbd "D") 'eclim-project-delete
-        (kbd "p") 'eclim-project-update
-        (kbd "g") 'eclim-project-mode-refresh
-        (kbd "R") 'eclim-project-rename
-        (kbd "q") 'eclim-quit-window)
-
-      (spacemacs/set-leader-keys-for-major-mode 'java-mode
-        "ea" 'eclim-problems-show-all
-        "eb" 'eclim-problems
-        "ec" 'eclim-problems-correct
-        "ee" 'eclim-problems-show-errors
-        "ef" 'eclim-problems-toggle-filefilter
-        "en" 'eclim-problems-next-same-window
-        "eo" 'eclim-problems-open
-        "ep" 'eclim-problems-previous-same-window
-        "ew" 'eclim-problems-show-warnings
-
-        "ds" 'start-eclimd
-        "dk" 'stop-eclimd
-
-        "ff" 'eclim-java-find-generic
-
-        "gt" 'eclim-java-find-type
-
-        "rc" 'eclim-java-constructor
-        "rg" 'eclim-java-generate-getter-and-setter
-        "rf" 'eclim-java-format
-        "ri" 'eclim-java-import-organize
-        "rj" 'eclim-java-implement
-        "rr" 'eclim-java-refactor-rename-symbol-at-point
-
-        "hc" 'eclim-java-call-hierarchy
-        "hh" 'eclim-java-show-documentation-for-current-element
-        "hi" 'eclim-java-hierarchy
-        "hu" 'eclim-java-find-references
-
-        "mi" 'spacemacs/java-maven-clean-install
-        "mI" 'spacemacs/java-maven-install
-        "mp" 'eclim-maven-lifecycle-phases
-        "mr" 'eclim-maven-run
-        "mR" 'eclim-maven-lifecycle-phase-run
-        "mt" 'spacemacs/java-maven-test
-
-        "aa" 'eclim-ant-run
-        "ac" 'eclim-ant-clear-cache
-        "ar" 'eclim-ant-run
-        "av" 'eclim-ant-validate
-
-        "pb" 'eclim-project-build
-        "pc" 'eclim-project-create
-        "pd" 'eclim-project-delete
-        "pg" 'eclim-project-goto
-        "pi" 'eclim-project-import
-        "pj" 'eclim-project-info-mode
-        "pk" 'eclim-project-close
-        "po" 'eclim-project-open
-        "pp" 'eclim-project-mode
-        "pu" 'eclim-project-update
-
-        "tt" 'eclim-run-junit))))
+(defun java/post-init-flycheck ()
+  (add-hook 'java-mode-local-vars-hook #'spacemacs//java-setup-flycheck))
 
 (defun java/post-init-ggtags ()
   (add-hook 'java-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
 
+(defun java/post-init-smartparens ()
+  (with-eval-after-load 'smartparens
+    (sp-local-pair 'java-mode "/** " " */" :trigger "/**")))
+
+(defun java/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'java-mode))
+
 (defun java/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'java-mode))
 
+(defun java/pre-init-org ()
+  (spacemacs|use-package-add-hook org
+    :post-config (add-to-list 'org-babel-load-languages '(java . t))))
+
 (defun java/init-java-mode ()
-  (setq java/key-binding-prefixes '(("me" . "errors")
-                                    ("md" . "eclimd")
-                                    ("mf" . "find")
-                                    ("mg" . "goto")
-                                    ("mr" . "refactor")
-                                    ("mh" . "documentation")
-                                    ("mm" . "maven")
-                                    ("ma" . "ant")
-                                    ("mp" . "project")
-                                    ("mt" . "test")))
-  (mapc (lambda(x) (spacemacs/declare-prefix-for-mode
-                    'java-mode (car x) (cdr x)))
-        java/key-binding-prefixes))
+  (use-package java-mode
+    :defer t
+    :init
+    (progn
+      (add-hook 'java-mode-local-vars-hook #'spacemacs//java-setup-backend)
+      (put 'java-backend 'safe-local-variable 'symbolp))))
+
+(defun java/init-maven-test-mode ()
+  (use-package maven-test-mode
+    :defer t
+    :init
+    (when (configuration-layer/package-used-p 'java-mode)
+      (add-hook 'java-mode-hook 'maven-test-mode)
+      (spacemacs/declare-prefix-for-mode 'java-mode "mm" "maven")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmg" "goto")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmt" "tests"))
+    :config
+    (progn
+      (spacemacs|hide-lighter maven-test-mode)
+      (spacemacs/set-leader-keys-for-minor-mode 'maven-test-mode
+        "mga"    'maven-test-toggle-between-test-and-class
+        "mgA"    'maven-test-toggle-between-test-and-class-other-window
+        "mta"    'maven-test-all
+        "mt C-a" 'maven-test-clean-test-all
+        "mtb"    'maven-test-file
+        "mti"    'maven-test-install
+        "mtt"    'maven-test-method))))
+
+(defun java/init-meghanada ()
+  (use-package meghanada
+    :defer t
+    :if (eq java-backend 'meghanada)
+    :init
+    (progn
+      (setq meghanada-server-install-dir (concat spacemacs-cache-directory
+                                                 "meghanada/")
+            company-meghanada-prefix-length 1
+            ;; let spacemacs handle company and flycheck itself
+            meghanada-use-company nil
+            meghanada-use-flycheck nil))
+    :config
+    (progn
+      ;; key bindings
+      (dolist (prefix '(("mc" . "compile")
+                        ("mD" . "daemon")
+                        ("mg" . "goto")
+                        ("mr" . "refactor")
+                        ("mt" . "test")
+                        ("mx" . "execute")))
+        (spacemacs/declare-prefix-for-mode
+          'java-mode (car prefix) (cdr prefix)))
+      (spacemacs/set-leader-keys-for-major-mode 'java-mode
+        "cb" 'meghanada-compile-file
+        "cc" 'meghanada-compile-project
+
+        "Dc" 'meghanada-client-direct-connect
+        "Dd" 'meghanada-client-disconnect
+        "Di" 'meghanada-install-server
+        "Dk" 'meghanada-server-kill
+        "Dl" 'meghanada-clear-cache
+        "Dp" 'meghanada-ping
+        "Dr" 'meghanada-restart
+        "Ds" 'meghanada-client-connect
+        "Du" 'meghanada-update-server
+        "Dv" 'meghanada-version
+
+        "gb" 'meghanada-back-jump
+
+        "=" 'meghanada-code-beautify
+        "ri" 'meghanada-optimize-import
+        "rI" 'meghanada-import-all
+
+        "ta" 'meghanada--run-junit
+        "tc" 'meghanada-run-junit-class
+        "tl" 'meghanada-run-junit-recent
+        "tt" 'meghanada-run-junit-test-case
+
+        ;; meghanada-switch-testcase
+        ;; meghanada-local-variable
+
+        "x:" 'meghanada-run-task))))
+
+(defun java/init-lsp-java ()
+  (use-package lsp-java
+    :defer t
+    :if (eq (spacemacs//java-backend) 'lsp)
+    :config
+    (progn
+      ;; key bindings
+      (dolist (prefix '(("ma" . "actionable")
+                        ("mc" . "compile/create")
+                        ("mg" . "goto")
+                        ("mr" . "refactor")
+                        ("mra" . "add/assign")
+                        ("mrc" . "create/convert")
+                        ("mrg" . "generate")
+                        ("mre" . "extract")
+                        ("mp" . "project")
+                        ("mq" . "lsp")
+                        ("mt" . "test")
+                        ("mx" . "execute")))
+        (spacemacs/declare-prefix-for-mode
+          'java-mode (car prefix) (cdr prefix)))
+      (spacemacs/set-leader-keys-for-major-mode 'java-mode
+        "pu"  'lsp-java-update-project-configuration
+
+        ;; refactoring
+        "ro" 'lsp-java-organize-imports
+        "rcp" 'lsp-java-create-parameter
+        "rcf" 'lsp-java-create-field
+        "rci" 'lsp-java-conver-to-static-import
+        "rec" 'lsp-java-extract-to-constant
+        "rel" 'lsp-java-extract-to-local-variable
+        "rem" 'lsp-java-extract-method
+
+        ;; assign/add
+        "rai" 'lsp-java-add-import
+        "ram" 'lsp-java-add-unimplemented-methods
+        "rat" 'lsp-java-add-throws
+        "raa" 'lsp-java-assign-all
+        "raf" 'lsp-java-assign-to-field
+
+        ;; generate
+        "rgt" 'lsp-java-generate-to-string
+        "rge" 'lsp-java-generate-equals-and-hash-code
+        "rgo" 'lsp-java-generate-overrides
+        "rgg" 'lsp-java-generate-getters-and-setters
+
+        ;; create/compile
+        "cc"  'lsp-java-build-project
+        "cp"  'lsp-java-spring-initializr
+
+        "an"  'lsp-java-actionable-notifications))))
+
+(defun java/init-mvn ()
+  (use-package mvn
+    :defer t
+    :init
+    (when (configuration-layer/package-used-p 'java-mode)
+      (spacemacs/declare-prefix-for-mode 'java-mode "mm" "maven")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmc" "compile")
+      (spacemacs/set-leader-keys-for-major-mode 'java-mode
+        "mcc" 'mvn-compile
+        "mcC" 'mvn-clean
+        "mcr" 'spacemacs/mvn-clean-compile))))

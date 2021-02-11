@@ -1,11 +1,24 @@
+;;; packages.el --- Racket Layer packages File for Spacemacs
+;;
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
+;;
+;; Author: Sylvain Benner <sylvain.benner@gmail.com>
+;; URL: https://github.com/syl20bnr/spacemacs
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; License: GPLv3
+
 (setq racket-packages
-  '(
-    company
-    company-quickhelp
-    ggtags
-    helm-gtags
-    racket-mode
-    ))
+      '(
+        company
+        company-quickhelp
+        ggtags
+        counsel-gtags
+        evil-cleverparens
+        helm-gtags
+        racket-mode
+        ))
 
 (defun racket/post-init-company ()
   ;; this is the only thing to do to enable company in racket-mode
@@ -25,6 +38,14 @@
 (defun racket/post-init-ggtags ()
   (add-hook 'racket-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
 
+(defun racket/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'racket-mode))
+
+(defun racket/pre-init-evil-cleverparens ()
+  (spacemacs|use-package-add-hook evil-cleverparens
+    :pre-init
+    (add-to-list 'evil-lisp-safe-structural-editing-modes 'racket-mode)))
+
 (defun racket/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'racket-mode))
 
@@ -33,7 +54,8 @@
     :defer t
     :init
     (progn
-      (spacemacs/register-repl 'racket-mode 'racket-repl "racket"))
+      (spacemacs/register-repl 'racket-mode 'racket-repl "racket")
+      (add-hook 'racket-mode-hook 'racket-xp-mode))
     :config
     (progn
       ;; smartparens configuration
@@ -53,7 +75,12 @@
 `insert state'."
         (interactive)
         (racket-run-and-switch-to-repl)
-        (evil-insert-state))
+        (when (buffer-live-p (get-buffer racket-repl-buffer-name))
+          ;; We don't need to worry about the first time the REPL is opened,
+          ;; since the first time, insert state is automatically entered (since
+          ;; it's registered as a REPL?).
+          (with-current-buffer racket-repl-buffer-name
+            (evil-insert-state))))
 
       (defun spacemacs/racket-send-last-sexp-focus ()
         "Call `racket-send-last-sexp' and switch to REPL buffer in
@@ -79,23 +106,36 @@
         (racket-repl)
         (evil-insert-state))
 
-      (dolist (prefix '(("mg" . "navigation")
+      (dolist (prefix '(("mE" . "errors")
+                        ("mg" . "navigation")
                         ("mh" . "doc")
                         ("mi" . "insert")
+                        ("mr" . "refactor")
                         ("ms" . "repl")
                         ("mt" . "tests")))
         (spacemacs/declare-prefix-for-mode 'racket-mode (car prefix) (cdr prefix)))
 
       (spacemacs/set-leader-keys-for-major-mode 'racket-mode
+        ;; errors
+        "En" 'racket-xp-next-error
+        "EN" 'racket-xp-previous-error
         ;; navigation
         "g`" 'racket-unvisit
+        "gg" 'racket-xp-visit-definition
+        "gn" 'racket-xp-next-definition
+        "gN" 'racket-xp-previous-definition
         "gm" 'racket-visit-module
         "gr" 'racket-open-require-path
+        "gu" 'racket-xp-next-use
+        "gU" 'racket-xp-previous-use
         ;; doc
-        "hd" 'racket-describe
-        "hh" 'racket-doc
+        "ha" 'racket-xp-annotate
+        "hd" 'racket-xp-describe
+        "hh" 'racket-xp-documentation
         ;; insert
         "il" 'racket-insert-lambda
+        ;; refactor
+        "mr" 'racket-xp-rename
         ;; REPL
         "'"  'racket-repl
         "sb" 'racket-run
@@ -107,13 +147,8 @@
         "si" 'racket-repl
         "sr" 'racket-send-region
         "sR" 'spacemacs/racket-send-region-focus
-        "ss" 'racket-repl
         ;; Tests
         "tb" 'racket-test
         "tB" 'spacemacs/racket-test-with-coverage)
-      (define-key racket-mode-map (kbd "H-r") 'racket-run)
-      ;; remove racket auto-insert of closing delimiter
-      ;; see https://github.com/greghendershott/racket-mode/issues/140
-      (define-key racket-mode-map ")" 'self-insert-command)
-      (define-key racket-mode-map "]" 'self-insert-command)
-      (define-key racket-mode-map "}" 'self-insert-command))))
+      (define-key racket-mode-map (kbd "H-r") 'racket-run))))
+

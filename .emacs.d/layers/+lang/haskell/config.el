@@ -1,6 +1,6 @@
 ;;; config.el --- Haskell Layer configuration File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Bjarke Vad Andersen <bjarke.vad90@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -11,18 +11,14 @@
 
 ;; Variables
 
-(setq haskell-modes '(haskell-mode literate-haskell-mode))
-
-(spacemacs|defvar-company-backends haskell-mode)
-(spacemacs|defvar-company-backends haskell-cabal-mode)
-(spacemacs|defvar-company-backends intero-repl-mode)
+(setq haskell-modes '(haskell-mode haskell-literate-mode))
 
 (spacemacs|define-jump-handlers haskell-mode haskell-mode-jump-to-def-or-tag)
 
-(defvar haskell-completion-backend 'ghci
+(defvar haskell-completion-backend nil
   "Completion backend used by company.
-Available options are `ghci', `intero' and `ghc-mod'. Default is
-`ghci'.")
+Available options are `dante' and `lsp'.
+If `nil' then `dante' is the default backend unless `lsp' layer is used.")
 
-(defvar haskell-enable-hindent-style nil
-  "Style to use for formatting with hindent; available are: fundamental johan-tibell chris-done gibiansky. If nil hindent is disabled.")
+(defvar haskell-enable-hindent nil
+  "Formatting with hindent; If t hindent is enabled.")

@@ -1,6 +1,6 @@
 ;;; packages.el --- HTML Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -10,80 +10,85 @@
 ;;; License: GPLv3
 
 (setq html-packages
-  '(
-    company
-    (company-web :toggle (configuration-layer/package-usedp 'company))
-    css-mode
-    emmet-mode
-    evil-matchit
-    flycheck
-    haml-mode
-    (helm-css-scss :toggle (configuration-layer/package-usedp 'helm))
-    less-css-mode
-    pug-mode
-    sass-mode
-    scss-mode
-    slim-mode
-    smartparens
-    tagedit
-    web-mode
-    yasnippet
-    ))
+      '(
+        add-node-modules-path
+        company
+        (company-web :requires company)
+        css-mode
+        emmet-mode
+        evil-matchit
+        flycheck
+        haml-mode
+        (counsel-css :requires ivy)
+        (helm-css-scss :requires helm)
+        impatient-mode
+        less-css-mode
+        prettier-js
+        pug-mode
+        sass-mode
+        scss-mode
+        slim-mode
+        smartparens
+        tagedit
+        web-mode
+        yasnippet
+        web-beautify
+        ))
+
+(defun html/post-init-add-node-modules-path ()
+  (add-hook 'css-mode-hook #'add-node-modules-path)
+  (add-hook 'less-css-mode-hook #'add-node-modules-path)
+  (add-hook 'pug-mode-hook #'add-node-modules-path)
+  (add-hook 'sass-mode-hook #'add-node-modules-path)
+  (add-hook 'scss-mode-hook #'add-node-modules-path)
+  (add-hook 'slim-mode-hook #'add-node-modules-path)
+  (add-hook 'web-mode-hook #'add-node-modules-path))
 
 (defun html/post-init-company ()
-  (spacemacs|add-company-hook css-mode))
+  (unless css-enable-lsp
+    (spacemacs|add-company-backends
+      :backends company-css
+      :modes css-mode)))
 
-;;TODO: whenever company-web makes a backend for haml-mode it should be added here. -- @robbyoconnor
 (defun html/init-company-web ()
   (use-package company-web
     :defer t
     :init
     (progn
-      (spacemacs|add-company-hook jade-mode)
-      (spacemacs|add-company-hook slim-mode)
-      (spacemacs|add-company-hook web-mode))))
+      (spacemacs|add-company-backends
+        :backends (company-web-html company-css)
+        :modes web-mode)
+      (spacemacs|add-company-backends
+        :backends company-web-jade
+        :modes pug-mode)
+      (spacemacs|add-company-backends
+        :backends company-web-slim
+        :modes slim-mode))))
 
 (defun html/init-css-mode ()
   (use-package css-mode
     :defer t
     :init
     (progn
-      (push 'company-css company-backends-css-mode)
-
       ;; Mark `css-indent-offset' as safe-local variable
       (put 'css-indent-offset 'safe-local-variable #'integerp)
+
+      (when css-enable-lsp
+        (add-hook 'css-mode-hook
+                  #'spacemacs//setup-lsp-for-web-mode-buffers t))
 
       ;; Explicitly run prog-mode hooks since css-mode does not derive from
       ;; prog-mode major-mode in Emacs 24 and below.
       (when (version< emacs-version "25")
         (add-hook 'css-mode-hook 'spacemacs/run-prog-mode-hooks))
 
-      (defun css-expand-statement ()
-        "Expand CSS block"
-        (interactive)
-        (save-excursion
-          (end-of-line)
-          (search-backward "{")
-          (forward-char 1)
-          (while (or (eobp) (not (looking-at "}")))
-          (let ((beg (point)))
-            (newline)
-            (search-forward ";")
-            (indent-region beg (point))
-            ))
-          (newline)))
-
-      (defun css-contract-statement ()
-        "Contract CSS block"
-        (interactive)
-        (end-of-line)
-        (search-backward "{")
-        (while (not (looking-at "}"))
-          (join-line -1)))
+      (spacemacs/declare-prefix-for-mode 'css-mode "m=" "format")
+      (spacemacs/declare-prefix-for-mode 'css-mode "mg" "goto")
+      (spacemacs/declare-prefix-for-mode 'css-mode "mz" "foldz")
 
       (spacemacs/set-leader-keys-for-major-mode 'css-mode
-        "zc" 'css-contract-statement
-        "zo" 'css-expand-statement))))
+        "zc" 'spacemacs/css-contract-statement
+        "zo" 'spacemacs/css-expand-statement))))
 
 (defun html/init-emmet-mode ()
   (use-package emmet-mode
@@ -95,12 +100,7 @@
                                                 web-mode-hook))
     :config
     (progn
-      (evil-define-key 'insert emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
-      (evil-define-key 'insert emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
-      (evil-define-key 'emacs emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
-      (evil-define-key 'emacs emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
-      (evil-define-key 'hybrid emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
-      (evil-define-key 'hybrid emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
+      (define-key emmet-mode-keymap (kbd "<C-return>") 'spacemacs/emmet-expand)
       (spacemacs|hide-lighter emmet-mode))))
 
 (defun html/post-init-evil-matchit ()
@@ -114,11 +114,19 @@
                   scss-mode
                   slim-mode
                   web-mode))
-    (spacemacs/add-flycheck-hook mode)))
+    (spacemacs/enable-flycheck mode)))
 
 (defun html/init-haml-mode ()
   (use-package haml-mode
     :defer t))
+
+(defun html/init-counsel-css ()
+  (use-package counsel-css
+    :defer t
+    :init (cl-loop for (mode . mode-hook) in '((css-mode . css-mode-hook)
+                                               (scss-mode . scss-mode-hook))
+                   do (add-hook mode-hook 'counsel-css-imenu-setup)
+                   (spacemacs/set-leader-keys-for-major-mode mode "gh" 'counsel-css))))
 
 (defun html/init-helm-css-scss ()
   (use-package helm-css-scss
@@ -127,16 +135,32 @@
     (dolist (mode '(css-mode scss-mode))
       (spacemacs/set-leader-keys-for-major-mode mode "gh" 'helm-css-scss))))
 
+(defun html/init-impatient-mode ()
+  (use-package impatient-mode
+    :defer t
+    :init
+    (progn
+      (dolist (mode '(web-mode css-mode))
+        (spacemacs/set-leader-keys-for-major-mode 'web-mode "I" 'spacemacs/impatient-mode)))))
+
 (defun html/init-less-css-mode ()
   (use-package less-css-mode
     :defer t
+    :init
+    (when less-enable-lsp
+      (add-hook 'less-css-mode-hook
+                #'spacemacs//setup-lsp-for-web-mode-buffers t))
     :mode ("\\.less\\'" . less-css-mode)))
+
+(defun html/pre-init-prettier-js ()
+  (when (eq web-fmt-tool 'prettier)
+    (dolist (mode '(css-mode less-css-mode scss-mode web-mode))
+      (add-to-list 'spacemacs--prettier-modes mode))))
 
 (defun html/init-pug-mode ()
   (use-package pug-mode
     :defer t
-    :mode ("\\.pug$" . pug-mode)
-    :init (push 'company-web-jade company-backends-jade-mode)))
+    :mode ("\\.pug$" . pug-mode)))
 
 (defun html/init-sass-mode ()
   (use-package sass-mode
@@ -146,12 +170,14 @@
 (defun html/init-scss-mode ()
   (use-package scss-mode
     :defer t
+    :init
+    (when scss-enable-lsp
+      (add-hook 'scss-mode-hook #'spacemacs//setup-lsp-for-web-mode-buffers t))
     :mode ("\\.scss\\'" . scss-mode)))
 
 (defun html/init-slim-mode ()
   (use-package slim-mode
-    :defer t
-    :init (push 'company-web-slim company-backends-slim-mode)))
+    :defer t))
 
 (defun html/post-init-smartparens ()
   (spacemacs/add-to-hooks
@@ -176,16 +202,18 @@
     :defer t
     :init
     (progn
-      (push '(company-web-html company-css) company-backends-web-mode)
-      (add-hook 'web-mode-hook 'spacemacs//company-web-minimum-prefix-length))
+      (spacemacs//web-setup-transient-state)
+      (when html-enable-lsp
+        (add-hook 'web-mode-hook #'spacemacs//setup-lsp-for-html-buffer t)))
     :config
     (progn
-      (spacemacs/declare-prefix-for-mode 'web-mode "me" "errors")
+      (spacemacs/declare-prefix-for-mode 'web-mode "m=" "format")
+      (spacemacs/declare-prefix-for-mode 'web-mode "mE" "errors")
       (spacemacs/declare-prefix-for-mode 'web-mode "mg" "goto")
       (spacemacs/declare-prefix-for-mode 'web-mode "mh" "dom")
       (spacemacs/declare-prefix-for-mode 'web-mode "mr" "refactor")
       (spacemacs/set-leader-keys-for-major-mode 'web-mode
-        "eh" 'web-mode-dom-errors-show
+        "El" 'web-mode-dom-errors-show
         "gb" 'web-mode-element-beginning
         "gc" 'web-mode-element-child
         "gp" 'web-mode-element-parent
@@ -198,53 +226,12 @@
         "rw" 'web-mode-element-wrap
         "z" 'web-mode-fold-or-unfold
         ;; TODO element close would be nice but broken with evil.
-        )
-
-      ;; (defvar spacemacs--web-mode-ms-doc-toggle 0
-      ;;   "Display a short doc when nil, full doc otherwise.")
-
-  ;;     (defun spacemacs//web-mode-ms-doc ()
-  ;;       (if (equal 0 spacemacs--web-mode-ms-doc-toggle)
-  ;;           "[_?_] for help"
-  ;;         "
-  ;; [_?_] display this help
-  ;; [_k_] previous [_j_] next   [_K_] previous sibling [_J_] next sibling
-  ;; [_h_] parent   [_l_] child  [_c_] clone [_d_] delete [_D_] kill [_r_] rename
-  ;; [_w_] wrap     [_p_] xpath
-  ;; [_q_] quit"))
-
-  ;;     (defun spacemacs//web-mode-ms-toggle-doc ()
-  ;;       (interactive)
-  ;;       (setq spacemacs--web-mode-ms-doc-toggle
-  ;;             (logxor spacemacs--web-mode-ms-doc-toggle 1)))
-
-      (spacemacs|define-transient-state web-mode
-        :title "Web-mode Transient State"
-        :columns 4
-        :foreign-keys run
-        :evil-leader-for-mode (web-mode . ".")
-        :bindings
-        ("j" web-mode-element-next "next")
-        ("J" web-mode-element-sibling-next "next sibling")
-        ("gj" web-mode-element-sibling-next)
-        ("k" web-mode-element-previous "previous")
-        ("K" web-mode-element-sibling-previous "previous sibling")
-        ("gk" web-mode-element-sibling-previous)
-        ("h" web-mode-element-parent "parent")
-        ("l" web-mode-element-child "child")
-        ("c" web-mode-element-clone "clone")
-        ("d" web-mode-element-vanish "delete")
-        ("D" web-mode-element-kill "kill")
-        ("r" web-mode-element-rename "rename" :exit t)
-        ("w" web-mode-element-wrap "wrap")
-        ("p" web-mode-dom-xpath "xpath")
-        ("q" nil "quit" :exit t)
-        ("<escape>" nil nil :exit t)))
-
+        ))
     :mode
     (("\\.phtml\\'"      . web-mode)
      ("\\.tpl\\.php\\'"  . web-mode)
      ("\\.twig\\'"       . web-mode)
+     ("\\.xml\\'"        . web-mode)
      ("\\.html\\'"       . web-mode)
      ("\\.htm\\'"        . web-mode)
      ("\\.[gj]sp\\'"     . web-mode)
@@ -256,9 +243,15 @@
      ("\\.hbs\\'"        . web-mode)
      ("\\.eco\\'"        . web-mode)
      ("\\.ejs\\'"        . web-mode)
+     ("\\.svelte\\'"     . web-mode)
+     ("\\.ctp\\'"        . web-mode)
      ("\\.djhtml\\'"     . web-mode))))
 
 (defun html/post-init-yasnippet ()
   (spacemacs/add-to-hooks 'spacemacs/load-yasnippet '(css-mode-hook
                                                       jade-mode
                                                       slim-mode)))
+(defun html/pre-init-web-beautify ()
+  (when (eq web-fmt-tool 'web-beautify)
+    (add-to-list 'spacemacs--web-beautify-modes (cons 'css-mode 'web-beautify-css))
+    (add-to-list 'spacemacs--web-beautify-modes (cons 'web-mode 'web-beautify-html))))

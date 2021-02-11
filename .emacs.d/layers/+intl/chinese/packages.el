@@ -1,6 +1,6 @@
 ;;; packages.el --- Chinese Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -21,12 +21,21 @@
         pangu-spacing
         org
         (youdao-dictionary :toggle chinese-enable-youdao-dict)
+        chinese-conv
         ))
 
 (defun chinese/init-fcitx ()
   (use-package fcitx
-    :init
-    (fcitx-evil-turn-on)))
+    :init (fcitx-evil-turn-on)
+    :config
+    (progn
+      (setq fcitx-active-evil-states '(insert emacs hybrid))
+      (when chinese-use-fcitx5
+        (setq fcitx-remote-command "fcitx5-remote"))
+      (fcitx-default-setup)
+      (fcitx-prefix-keys-add "M-m" "C-M-m")
+      (when chinese-fcitx-use-dbus
+        (setq fcitx-use-dbus t)))))
 
 (defun chinese/init-chinese-wbim ()
   "Initialize chinese-wubi"
@@ -93,6 +102,10 @@
                  (add-hook 'org-mode-hook
                            '(lambda ()
                               (set (make-local-variable 'pangu-spacing-real-insert-separtor) t))))))
+
+(defun chinese/init-chinese-conv ()
+  (use-package chinese-conv
+    :defer t))
 
 (defun chinese/post-init-org ()
   (defadvice org-html-paragraph (before org-html-paragraph-advice

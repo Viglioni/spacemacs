@@ -1,6 +1,6 @@
 ;;; packages.el --- cscope Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -11,7 +11,7 @@
 
 (setq cscope-packages
       '(
-        (helm-cscope :toggle (configuration-layer/package-usedp 'helm))
+        (helm-cscope :requires helm)
         xcscope
         ))
 
@@ -37,7 +37,8 @@
                                                  (cscope//safe-project-root)))))
         (let ((default-directory directory))
           (shell-command
-           (format "pycscope -R -f '%s'"
+           (format "%s -R -f '%s'"
+                   pycscope-binary
                    (expand-file-name "cscope.out" directory))))))))
 
 (defun cscope/init-helm-cscope ()
@@ -47,6 +48,7 @@
     (defun spacemacs/setup-helm-cscope (mode)
       "Setup `helm-cscope' for MODE"
       (spacemacs/set-leader-keys-for-major-mode mode
+        "g=" 'helm-cscope-find-assignments-to-this-symbol
         "gc" 'helm-cscope-find-called-function
         "gC" 'helm-cscope-find-calling-this-function
         "gd" 'helm-cscope-find-global-definition

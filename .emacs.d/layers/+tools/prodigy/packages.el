@@ -1,6 +1,6 @@
 ;;; packages.el --- Prodigy Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -14,19 +14,23 @@
 (defun prodigy/init-prodigy ()
   (use-package prodigy
     :init
-    (spacemacs/set-leader-keys "aS" 'prodigy)
+    (spacemacs/set-leader-keys "atp" 'prodigy)
     :config
-    (evilified-state-evilify prodigy-mode prodigy-mode-map
-      "h" 'prodigy-first
-      "j" 'prodigy-next
-      "k" 'prodigy-prev
-      "l" 'prodigy-last
-      "H" 'prodigy-display-process
-      "J" 'prodigy-next-with-status
-      "K" 'prodigy-prev-with-status
-      "L" 'prodigy-start
-      "d" 'prodigy-jump-dired
-      "g" 'prodigy-jump-magit
-      "Y" 'prodigy-copy-cmd
-      "R" 'revert-buffer)
-    (evil-define-key 'motion prodigy-view-mode-map (kbd "gf") 'find-file-at-point)))
+    (progn
+      (evilified-state-evilify prodigy-mode prodigy-mode-map
+        "c" 'prodigy-view-clear-buffer
+        "h" 'prodigy-first
+        "j" 'prodigy-next
+        "k" 'prodigy-prev
+        "l" 'prodigy-last
+        "H" 'prodigy-display-process
+        "J" 'prodigy-next-with-status
+        "K" 'prodigy-prev-with-status
+        "L" 'prodigy-start
+        "d" 'prodigy-jump-file-manager
+        "g" 'prodigy-jump-magit
+        "Y" 'prodigy-copy-cmd
+        "R" 'revert-buffer)
+      (evilified-state-evilify prodigy-view-mode prodigy-view-mode-map
+        "gf" 'find-file-at-point
+        "q" 'quit-window))))

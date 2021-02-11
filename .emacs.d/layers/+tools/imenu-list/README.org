@@ -1,12 +1,15 @@
 #+TITLE: imenu-list layer
 
-* Table of Contents                                         :TOC_4_gh:noexport:
- - [[#description][Description]]
- - [[#screenshot][Screenshot]]
- - [[#install][Install]]
- - [[#key-bindings][Key bindings]]
-   - [[#from-any-buffer][From any buffer]]
-   - [[#from-imenu-list-buffer][From imenu-list buffer]]
+#+TAGS: layer|tool
+
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#screenshot][Screenshot]]
+- [[#install][Install]]
+- [[#key-bindings][Key bindings]]
+  - [[#from-any-buffer][From any buffer]]
+  - [[#from-imenu-list-buffer][From imenu-list buffer]]
 
 * Description
 This layer uses [[https://github.com/bmag/imenu-list][imenu-list]] to show the current buffer's index in a side bar.
@@ -14,8 +17,10 @@ This layer uses [[https://github.com/bmag/imenu-list][imenu-list]] to show the c
 This is similar to `SPC j i` but displayed in a persistent sidebar instead of
 a completion buffer.
 
-* Screenshot
+** Features:
+- IDE like outline view of current buffer showing all significant symbols in one view
 
+* Screenshot
 [[file:img/imenu-list-example.png]]
 
 * Install
@@ -26,15 +31,17 @@ this file.
 * Key bindings
 ** From any buffer
 
-| Key Binding | Description              |
-|-------------+--------------------------|
-| ~SPC b i~   | toggle imenu-list window |
+| Key binding | Description                                      |
+|-------------+--------------------------------------------------|
+| ~SPC b i~   | focus imenu tree sidebar (creating if necessary) |
+| ~SPC T i~   | toggle imenu tree sidebar                        |
 
 ** From imenu-list buffer
 
-| Key Binding | Description                                            |
+| Key binding | Description                                            |
 |-------------+--------------------------------------------------------|
 | ~q~         | quit imenu-list window                                 |
 | ~RET~       | go to current entry                                    |
 | ~d~         | display current entry, keep focus on imenu-list window |
 | ~f~         | fold/unfold current section                            |
+| ~r~         | refresh imenu-list window                              |

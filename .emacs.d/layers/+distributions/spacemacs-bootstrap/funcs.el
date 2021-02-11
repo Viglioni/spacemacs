@@ -1,6 +1,6 @@
 ;;; funcs.el --- Spacemacs Bootstrap Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -8,6 +8,7 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+
 
 
 
@@ -34,6 +35,34 @@
                   evil-state)))
     (spacemacs/state-color-face state)))
 
+(defun spacemacs/add-evil-cursor (state color shape)
+  "Define a cursor and face for a new evil state.
+An appropriate entry is added to `spacemacs-evil-cursors', as well.
+
+For evil states that do not need an evil cursor use
+`spacemacs/define-evil-state-face' instead."
+  (add-to-list 'spacemacs-evil-cursors (list state color shape))
+  (spacemacs/define-evil-state-face state color)
+  (set (intern (format "evil-%s-state-cursor" state))
+       (list (when dotspacemacs-colorize-cursor-according-to-state color)
+             shape)))
+
+(defun spacemacs/define-evil-state-face (state color)
+  "Define a face for an evil state.
+For evil states that also need an entry to `spacemacs-evil-cursors' use
+`spacemacs/add-evil-cursor' instead."
+  ;; this function and `spacemacs/add-evil-cursor' need to be separate because
+  ;; some states must explicitly *not* have their own evil spacemacs cursor
+  ;; for example treemacs: it needs no cursor since it solely uses hl-line-mode
+  ;; and having an evil cursor defined anyway leads to the cursor sometimes
+  ;; visibly flashing in treemacs buffers
+  (eval `(defface ,(intern (format "spacemacs-%s-face" state))
+           `((t (:background ,color
+                             :foreground ,(face-background 'mode-line)
+                             :inherit 'mode-line)))
+           (format "%s state face." state)
+           :group 'spacemacs)))
+
 (defun spacemacs/set-state-faces ()
   (cl-loop for (state color cursor) in spacemacs-evil-cursors
            do
@@ -44,11 +73,32 @@
 (defun evil-insert-state-cursor-hide ()
   (setq evil-insert-state-cursor '((hbar . 0))))
 
+(defun spacemacs/set-evil-search-module (style)
+  "Set the evil search module depending on STYLE."
+  (cond
+   ((or (eq 'vim style)
+        (and (eq 'hybrid style)
+             (bound-and-true-p hybrid-style-use-evil-search-module)))
+    ;; if Evil is loaded already, just setting `evil-search-module' isn't
+    ;; enough, we need to call `evil-select-search-module' as well (this is done
+    ;; automatically when `evil-search-module' is changed via customize)
+    (if (featurep 'evil-search)
+        (evil-select-search-module 'evil-search-module 'evil-search)
+      (setq-default evil-search-module 'evil-search)))
+   (t
+    (if (featurep 'evil-search)
+        (evil-select-search-module 'evil-search-module 'isearch)
+      (setq-default evil-search-module 'isearch)))))
+
+(defun spacemacs/evil-search-clear-highlight ()
+  "Clear evil-search or evil-ex-search persistent highlights."
+  (interactive)
+  (evil-ex-nohighlight)) ; `/' highlights
+
 (defun spacemacs/evil-smart-doc-lookup ()
-  "Version of `evil-lookup' that attempts to use
-        the mode specific goto-definition binding,
-        i.e. `SPC m h h`, to lookup the source of the definition,
-        while falling back to `evil-lookup'"
+  "Run documentation lookup command specific to the major mode.
+Use command bound to `SPC m h h` if defined, otherwise fall back
+to `evil-lookup'"
   (interactive)
   (let ((binding (key-binding (kbd (concat dotspacemacs-leader-key " mhh")))))
     (if (commandp binding)
@@ -87,11 +137,11 @@ the boundaries of the text object."
                                           ,(regexp-quote start)
                                           ,(regexp-quote end))
      (with-eval-after-load 'evil-surround
-       (push (cons (string-to-char ,key)
-                   (if ,end
-                       (cons ,start ,end)
-                     ,start))
-             evil-surround-pairs-alist))))
+       (add-to-list 'evil-surround-pairs-alist
+                    (cons (string-to-char ,key)
+                          (if ,end
+                              (cons ,start ,end)
+                            ,start))))))
 
 (defmacro spacemacs|define-text-object-regexp (key name start-regexp end-regexp)
   "Define a text object.
@@ -136,3 +186,62 @@ Example: (evil-map visual \"<\" \"<gv\")"
   "Custom hint documentation format for keys."
   (format (format "[%%%ds] %%%ds" key-width (- -1 doc-width))
           key doc))
+
+
+
+(defvar spacemacs--scroll-ts-full-hint-toggle t
+  "Toggle the state of the scroll transient state documentation.
+
+Initial value is t so full hint will be shown by default. This is
+to preserve the behavior before hint toggle was implemented for
+the scroll transient state.")
+
+(defvar spacemacs--scroll-ts-full-hint nil
+  "Display full scroll transient state documentation.")
+
+(defun spacemacs//scroll-ts-toggle-hint ()
+  "Toggle the full hint docstring for the scroll transient state."
+  (interactive)
+  (setq spacemacs--scroll-ts-full-hint-toggle
+        (not spacemacs--scroll-ts-full-hint-toggle)))
+
+(defun spacemacs//scroll-ts-hint ()
+  "Return a condensed/full hint for the scroll transient state"
+  (concat
+   " "
+   (if spacemacs--scroll-ts-full-hint-toggle
+       spacemacs--scroll-ts-full-hint
+     (concat "[" (propertize "?" 'face 'hydra-face-red) "] toggle help"))))
+
+
+
+(defun use-package-normalize/:spacebind (name-symbol keyword args)
+  (use-package-only-one (symbol-name keyword) args
+    (lambda (label arg)
+      (if (and (listp arg) (keywordp (car arg)))
+          arg
+        (use-package-error
+         ":spacebind wants an arg list compatible with `spacebind' macro")))))
+
+(defun use-package-handler/:spacebind (name-symbol keyword args rest state)
+  (let ((body (use-package-process-keywords name-symbol rest state)))
+    (if (null args)
+        body
+      (use-package-concat
+       body
+       `((spacemacs|spacebind ,@args))))))
+
+
+
+;; As suggested in the Emacs wiki https://www.emacswiki.org/emacs/HideShow#toc5
+(defun spacemacs/toggle-selective-display (column)
+  "Toggle selective display by column, a.k.a. folding by indentation.
+
+Invokes `set-selective-display', but if a prefix argument is not supplied and
+`selective-display' is not already true, source the prefix argument from the
+column."
+  (interactive "P")
+  (set-selective-display
+   (or column
+       (unless selective-display
+         (1+ (current-column))))))

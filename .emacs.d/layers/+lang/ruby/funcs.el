@@ -1,6 +1,6 @@
 ;;; funcs.el --- Ruby Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -8,6 +8,73 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+
+
+;; backend
+
+(defun spacemacs//ruby-backend ()
+  "Returns selected backend."
+  (if ruby-backend
+      ruby-backend
+    (cond
+     ((configuration-layer/layer-used-p 'lsp) 'lsp)
+     (t 'robe))))
+
+(defun spacemacs//ruby-setup-backend ()
+  "Conditionally configure Ruby backend"
+  (spacemacs//ruby-setup-version-manager)
+  (pcase (spacemacs//ruby-backend)
+    (`lsp (spacemacs//ruby-setup-lsp))
+    (`robe (spacemacs//ruby-setup-robe))))
+
+(defun spacemacs//ruby-setup-company ()
+  "Configure backend company"
+  (pcase (spacemacs//ruby-backend)
+    (`robe (spacemacs//ruby-setup-robe-company))
+    (`lsp nil))) ;; Company is automatically set up by lsp
+
+(defun spacemacs//ruby-setup-dap ()
+  "Conditionally setup elixir DAP integration."
+  ;; currently DAP is only available using LSP
+  (pcase (spacemacs//ruby-backend)
+    (`lsp (spacemacs//ruby-setup-lsp-dap))))
+
+
+;; lsp
+
+(defun spacemacs//ruby-setup-lsp ()
+  "Setup Ruby lsp."
+  (if (configuration-layer/layer-used-p 'lsp)
+      (lsp)
+    (message "`lsp' layer is not installed, please add `lsp' layer to your dotfile.")))
+
+(defun spacemacs//ruby-setup-lsp-dap ()
+  "Setup DAP integration."
+  (require 'dap-ruby))
+
+
+;; robe
+
+(defun spacemacs//ruby-setup-robe ()
+  (robe-mode))
+
+(defun spacemacs//ruby-setup-robe-company ()
+  "Setup robe auto-completion."
+  (when (configuration-layer/package-used-p 'robe)
+    (spacemacs|add-company-backends
+      :backends company-robe
+      :modes ruby-mode enh-ruby-mode))
+  (with-eval-after-load 'company-dabbrev-code
+    (dolist (mode '(ruby-mode enh-ruby-mode))
+      (add-to-list 'company-dabbrev-code-modes mode))))
+
+
+;; version manager
+
+(defun spacemacs//ruby-setup-version-manager ()
+  "Setup ruby version manager."
+  (pcase ruby-version-manager
+    (`rbenv (spacemacs//enable-rbenv))))
 
 
 ;; rbenv
@@ -59,3 +126,39 @@ Called interactively it prompts for a directory."
   "Conditionally enable `minitest-mode'"
   (when (eq 'minitest ruby-test-runner)
     (minitest-enable-appropriate-mode)))
+
+
+;; highlight debugger keywords
+
+(defun spacemacs/ruby-maybe-highlight-debugger-keywords ()
+  "Highlight break point lines."
+  (interactive)
+  (when ruby-highlight-debugger-keywords
+    (highlight-lines-matching-regexp "byebug")
+    (highlight-lines-matching-regexp "binding.irb")
+    (highlight-lines-matching-regexp "binding.pry")))
+
+
+;; Insert text
+
+(defun spacemacs/ruby-insert-frozen-string-literal-comment ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (insert "# frozen_string_literal: true\n")))
+
+(defun spacemacs/ruby-insert-shebang ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (insert "#!/usr/bin/env ruby\n")))
+
+
+;; Prettier
+
+(defun spacemacs/ruby-format ()
+  (interactive)
+  (call-interactively 'prettier-js))
+
+(defun spacemacs/ruby-fmt-before-save-hook ()
+  (add-hook 'before-save-hook 'spacemacs/ruby-format t t))

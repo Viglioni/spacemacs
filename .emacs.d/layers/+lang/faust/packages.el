@@ -1,6 +1,6 @@
 ;;; packages.el --- faust layer packages file for Spacemacs.
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author:  Bart Brouns <bart@magnetophon.nl>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -12,12 +12,14 @@
 ;;; Code:
 
 (defconst faust-packages
-  '(company
+  '(
+    company
     faust-mode
-    yasnippet))
+    yasnippet
+    ))
 
 (defun faust/post-init-company ()
-  (spacemacs|add-company-hook faust-mode))
+  (spacemacs|add-company-backends :modes faust-mode))
 
 (defun faust/init-faust-mode ()
   (use-package faust-mode

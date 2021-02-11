@@ -1,6 +1,6 @@
 ;;; packages.el --- jabber Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Tosh Lyons <tosh.lyons@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,7 +9,10 @@
 ;;
 ;;; License: GPLv3
 
-(setq jabber-packages '(jabber))
+(defconst jabber-packages
+  '(
+    jabber
+    window-purpose))
 
 (defun jabber/init-jabber ()
   (use-package jabber
@@ -17,7 +20,7 @@
     :init
     (progn
       (add-hook 'jabber-post-connect-hooks 'spacemacs/jabber-connect-hook)
-      (spacemacs/set-leader-keys "aj" 'jabber-connect-all))
+      (spacemacs/set-leader-keys "acj" 'jabber-connect-all))
     :config
     (progn
       (spacemacs/set-leader-keys-for-major-mode 'jabber-roster-mode
@@ -37,3 +40,10 @@
         "j" 'jabber-go-to-next-roster-item
         "k" 'jabber-go-to-previous-roster-item))))
 
+(defun jabber/post-init-window-purpose ()
+  (purpose-set-extension-configuration
+   :jabber-layer
+   (purpose-conf :mode-purposes '((jabber-browse-mode . chat)
+                                  (jabber-chat-mode . chat)
+                                  (jabber-console-mode . chat)
+                                  (jabber-roster-mode . chat)))))

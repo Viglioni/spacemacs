@@ -1,6 +1,6 @@
 ;;; packages.el --- swift Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Uri Sharf <uri.sharf@me.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,7 +15,7 @@
       swift-mode
       ))
 
-(defun swift/post-init-flycheck ()
+(defun swift/pre-init-flycheck ()
   (spacemacs|use-package-add-hook flycheck
     :post-config (add-to-list 'flycheck-checkers 'swift)))
 
@@ -25,14 +25,14 @@
     :defer t
     :init
     (progn
-      (spacemacs|advise-commands "store-initial-buffer-name"
-                                 (swift-mode-run-repl) around
-       "Store current buffer bane in bufffer local variable,
+      (defun spacemacs//swift-store-initial-buffer-name (func &rest args)
+        "Store current buffer bane in bufffer local variable,
 before activiting or switching to REPL."
-       (let ((initial-buffer (current-buffer)))
-         ad-do-it
-         (with-current-buffer swift-repl-buffer
-           (setq swift-repl-mode-previous-buffer initial-buffer))))
+        (let ((initial-buffer (current-buffer)))
+          (apply func args)
+          (with-current-buffer swift-repl-buffer
+            (setq swift-repl-mode-previous-buffer initial-buffer))))
+      (advice-add 'swift-mode-run-repl :around #'spacemacs//swift-store-initial-buffer-name)
 
       (defun spacemacs/swift-repl-mode-hook ()
         "Hook to run when starting an interactive swift mode repl"
@@ -48,10 +48,10 @@ before activiting or switching to REPL."
     :config
     (progn
       (spacemacs/set-leader-keys-for-major-mode 'swift-mode
-        "sS" 'swift-mode-run-repl      ; run or switch to an existing swift repl
-        "ss" 'swift-mode-run-repl
-        "sb" 'swift-mode-send-buffer
-        "sr" 'swift-mode-send-region)
+        "sS" 'swift-mode:run-repl      ; run or switch to an existing swift repl
+        "ss" 'swift-mode:run-repl
+        "sb" 'swift-mode:send-buffer
+        "sr" 'swift-mode:send-region)
 
       (with-eval-after-load 'swift-repl-mode-map
         ;; Switch back to editor from REPL

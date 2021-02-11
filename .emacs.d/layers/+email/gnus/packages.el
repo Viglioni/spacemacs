@@ -1,6 +1,6 @@
 ;;; packages.el --- gnus Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,7 +9,20 @@
 ;;
 ;;; License: GPLv3
 
-(setq gnus-packages '(gnus))
+(defconst gnus-packages
+  '(
+    gnus
+    window-purpose
+    persp-mode))
+
+(defun gnus/pre-init-persp-mode ()
+  (spacemacs|use-package-add-hook persp-mode
+    :post-config
+    (progn
+      (spacemacs|define-custom-layout gnus-spacemacs-layout-name
+        :binding gnus-spacemacs-layout-binding
+        :body
+        (call-interactively 'gnus)))))
 
 (defun gnus/init-gnus ()
   "Initialize my package"
@@ -17,23 +30,19 @@
     :defer t
     :commands gnus
     :init
-    (spacemacs/set-leader-keys "ag" 'gnus)
-    :config
     (progn
-      ;; No primary server
-      (setq gnus-select-method '(nnnil ""))
-
-      ;; Use topics per default
-      (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
-
-      (setq gnus-visible-headers
-            "^From:\\|^Reply-To\\|^Organization:\\|^To:\\|^Cc:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Gnus")
-
-      ;; Show the article headers in this order.
-      (setq gnus-sorted-header-list
-            '("^From:" "^Reply-To" "^Organization:" "^To:" "^Cc:" "^Newsgroups:"
-              "^Subject:" "^Date:" "^Gnus"))
-
+      (spacemacs/declare-prefix "aeg" "gnus" "Gnus newsreader")
+      (spacemacs/set-leader-keys
+        "aegg" 'gnus
+        "aegs" 'gnus-slave
+        "aegu" 'gnus-unplugged
+        "aego" 'gnus-slave-unplugged)
+      (spacemacs/declare-prefix-for-mode 'message-mode "mi" "insert")
+      (spacemacs/set-leader-keys-for-major-mode 'message-mode
+        ;; RFC 1855
+        "miF" 'flame-on)
+      ;; NOTE: If any of the following variables are modified,
+      ;; also update their values in: `gnus/README.org'
       (setq-default
        gnus-summary-line-format "%U%R%z %(%&user-date;  %-15,15f  %B (%c) %s%)\n"
        gnus-user-date-format-alist '((t . "%Y-%m-%d %H:%M"))
@@ -54,10 +63,33 @@
        gnus-mime-display-multipart-related-as-mixed t ; Show more MIME-stuff:
        gnus-auto-select-first nil ; Don't get the first article automatically:
        smiley-style 'medium
-       gnus-keep-backlog '0)
+       gnus-keep-backlog '0))
+    :config
+    (progn
+      ;; No primary server
+      (setq gnus-select-method '(nnnil ""))
+
+      ;; Use topics per default
+      (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
+
+      (setq gnus-visible-headers
+            "^From:\\|^Reply-To\\|^Organization:\\|^To:\\|^Cc:\\|^Newsgroups:\\|^Subject:\\|^Date:\\|^Gnus")
+
+      ;; Show the article headers in this order.
+      (setq gnus-sorted-header-list
+            '("^From:" "^Reply-To" "^Organization:" "^To:" "^Cc:" "^Newsgroups:"
+              "^Subject:" "^Date:" "^Gnus"))
 
       (require 'browse-url)
       (require 'nnrss)
+      (defun spacemacs/gnus-flame-on ()
+        "Most important email function, for RFC1855 compliance."
+        ;; https://tools.ietf.org/html/rfc1855
+        (interactive)
+        (insert "FLAME ON:\n")
+        (insert "FLAME OFF\n")
+        (forward-line -2)
+        (end-of-line))
       (defun spacemacs/browse-nnrss-url (arg)
         "Open RSS Article directy in the browser"
         (interactive "p")
@@ -73,7 +105,9 @@
             (gnus-summary-scroll-up arg))))
       (add-to-list 'nnmail-extra-headers nnrss-url-field)
 
-      (evilified-state-evilify gnus-group-mode gnus-group-mode-map)
+      (evilified-state-evilify gnus-group-mode gnus-group-mode-map
+        (kbd "g r") 'gnus-group-get-new-news
+        (kbd "O") 'gnus-group-group-map)
       (evilified-state-evilify gnus-server-mode gnus-server-mode-map)
       (evilified-state-evilify gnus-browse-mode gnus-browse-mode-map)
       (evilified-state-evilify gnus-article-mode gnus-article-mode-map)
@@ -81,3 +115,12 @@
         (kbd "J") 'gnus-summary-next-article
         (kbd "K") 'gnus-summary-prev-article
         (kbd "<RET>") 'spacemacs/browse-nnrss-url))))
+
+(defun gnus/post-init-window-purpose ()
+  (purpose-set-extension-configuration
+   :gnus-layer
+   (purpose-conf :mode-purposes '((gnus-group-mode . mail)
+                                  (gnus-server-mode . mail)
+                                  (gnus-browse-mode . mail)
+                                  (gnus-article-mode . mail)
+                                  (gnus-summary-mode . mail)))))

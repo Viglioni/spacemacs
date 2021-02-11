@@ -1,6 +1,6 @@
 ;;; packages.el --- Erlang Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -10,16 +10,18 @@
 ;;; License: GPLv3
 
 (setq erlang-packages
-  '(
-    company
-    erlang
-    ggtags
-    helm-gtags
-    flycheck
-    ))
+      '(
+        company
+        erlang
+        ggtags
+        counsel-gtags
+        helm-gtags
+        flycheck
+        ))
 
 (defun erlang/post-init-company ()
-  (add-hook 'erlang-mode-hook 'company-mode))
+  ;; backend specific
+  (spacemacs//erlang-setup-company))
 
 (defun erlang/init-erlang ()
   (use-package erlang
@@ -28,7 +30,10 @@
     (progn
       ;; explicitly run prog-mode hooks since erlang mode does is not
       ;; derived from prog-mode major-mode
-      (add-hook 'erlang-mode-hook 'spacemacs/run-prog-mode-hooks)
+      (spacemacs/add-to-hook 'erlang-mode-hook
+                             '(spacemacs/run-prog-mode-hooks
+                               spacemacs//erlang-setup-backend
+                               spacemacs//erlang-default))
       ;; (setq erlang-root-dir "/usr/lib/erlang/erts-5.10.3")
       ;; (add-to-list 'exec-path "/usr/lib/erlang/erts-5.10.3/bin")
       ;; (setq erlang-man-root-dir "/usr/lib/erlang/erts-5.10.3/man")
@@ -39,14 +44,16 @@
       ;;             (setq inferior-erlang-machine-options '("-sname" "syl20bnr"))
       ;;             ))
       (setq erlang-compile-extra-opts '(debug_info)))
-    :config
-    (require 'erlang-start)))
+    :config (require 'erlang-start)))
 
 (defun erlang/post-init-flycheck ()
-  (spacemacs/add-flycheck-hook 'erlang-mode))
+  (spacemacs/enable-flycheck 'erlang-mode))
 
 (defun erlang/post-init-ggtags ()
   (add-hook 'erlang-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
+
+(defun erlang/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'erlang-mode))
 
 (defun erlang/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'erlang-mode))

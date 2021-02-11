@@ -1,6 +1,6 @@
 ;;; config.el --- Ansible Layer functions File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Brian Hicks <brian@brianthicks.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -11,7 +11,7 @@
 
 ;; variables
 
-(defvar ansible-auto-encrypt-descrypt t
+(defvar ansible-auto-encrypt-decrypt t
   "Set it to non-nil to seamlessly edit `ansible-vault' encrypted files.
 If non-nil then encrypted files are automatically decrypted when opened and
  encrypted when saved.")
@@ -19,4 +19,4 @@ If non-nil then encrypted files are automatically decrypted when opened and
 ;; detect filenames compatible with Ansible's recommended layout.
 ;; http://docs.ansible.com/playbooks_best_practices.html#directory-layout
 (setq spacemacs--ansible-filename-re
-      ".*\\(main\.yml\\|site\.yml\\|encrypted\.yml\\|roles/.+\.yml\\|group_vars/.+\\|host_vars/.+\\)")
+      "/\\(main\\|site\\|encrypted\\|\\(\\(roles\\|tasks\\|handlers\\|vars\\|defaults\\|meta\\|group_vars\\|host_vars\\)/.+\\)\\)\\.ya?ml$")

@@ -1,6 +1,6 @@
 ;;; packages.el --- spacemacs-org layer packages file for Spacemacs.
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Boris Buliga <d12frosted@d12frosted.local>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -22,7 +22,7 @@
     ;; `org' package.
     (default-org-config :location built-in)
     (org-plus-contrib :step pre)
-    org-bullets
+    org-superstar
     (space-doc :location local)
     toc-org
     ))
@@ -62,10 +62,10 @@
       ;; Open links and files with RET in normal state
       (evil-define-key 'normal org-mode-map (kbd "RET") 'org-open-at-point)))))
 
-(defun spacemacs-org/init-org-bullets ()
-  (use-package org-bullets
+(defun spacemacs-org/init-org-superstar ()
+  (use-package org-superstar
     :defer t
-    :init (add-hook 'org-mode-hook 'org-bullets-mode)))
+    :init (add-hook 'org-mode-hook 'org-superstar-mode)))
 
 (defun spacemacs-org/init-toc-org ()
   (use-package toc-org
@@ -75,6 +75,7 @@
       (setq toc-org-max-depth 10)
       (add-hook 'org-mode-hook 'toc-org-enable))))
 
-(defun spacemacs-org/init-space-doc ())
+(defun spacemacs-org/init-space-doc ()
+  (add-hook 'org-mode-hook 'dotspacemacs//prettify-spacemacs-docs))
 
 ;;; packages.el ends here

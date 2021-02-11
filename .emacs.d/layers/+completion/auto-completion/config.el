@@ -1,6 +1,6 @@
 ;;; config.el --- Auto-completion configuration File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -10,6 +10,14 @@
 ;;; License: GPLv3
 
 ;; Company -------------------------------------------------------------------
+
+(defvar spacemacs-default-company-backends
+  '((company-semantic company-dabbrev-code company-gtags company-etags company-keywords)
+    company-files company-dabbrev)
+  "The list of default company backends used by spacemacs.
+This variable is used to configure mode-specific company backends in spacemacs.
+Backends in this list will always be active in these modes, as well as any
+backends added by individual spacemacs layers.")
 
 (defvar-local auto-completion-front-end 'company
   "Which auto-completion front end to use.")
@@ -30,6 +38,12 @@ selection.")
   "Timeout (seconds) when waiting for the second key of
 `auto-completion-complete-with-key-sequence'.")
 
+(defvar auto-completion-minimum-prefix-length 2
+  "The minimum prefix length for idle completion.")
+
+(defvar auto-completion-idle-delay 0.2
+  "Delay (seconds) before completions are shown.")
+
 (defvar auto-completion-enable-snippets-in-popup nil
   "If non nil show snippets in the auto-completion popup.")
 
@@ -40,6 +54,9 @@ selection.")
   "If non nil the docstring appears in a tooltip.
 If set to `manual', help tooltip appears only when invoked
 manually.")
+
+(defvar auto-completion-use-company-box nil
+  "If non nil company-box is used.")
 
 (defvar company-mode-completion-cancel-keywords
   '("do"

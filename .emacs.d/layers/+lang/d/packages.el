@@ -1,6 +1,6 @@
 ;;; packages.el --- d Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -14,26 +14,26 @@
 (setq d-packages
       '(
         company
-        (company-dcd :toggle (configuration-layer/package-usedp 'company))
+        (company-dcd :requires company)
         d-mode
         flycheck
-        (flycheck-dmd-dub :toggle (configuration-layer/package-usedp 'flycheck))
+        (flycheck-dmd-dub :requires flycheck)
         ggtags
+        counsel-gtags
         helm-gtags
         ))
 
 (defun d/post-init-company ()
   ;; Need to convince company that this C-derived mode is a code mode.
-  (with-eval-after-load 'company-dabbrev-code (push 'd-mode company-dabbrev-code-modes))
-  (spacemacs|add-company-hook d-mode))
+  (with-eval-after-load 'company-dabbrev-code
+    (add-to-list 'company-dabbrev-code-modes 'd-mode)))
 
 (defun d/init-company-dcd ()
   (use-package company-dcd
     :defer t
     :init
     (progn
-      (add-hook 'd-mode-hook 'company-dcd-mode)
-      (push 'company-dcd company-backends-d-mode)
+      (spacemacs|add-company-backends :backends company-dcd :modes d-mode)
       (spacemacs/set-leader-keys-for-major-mode 'd-mode
         "gg" 'company-dcd-goto-definition
         "gb" 'company-dcd-goto-def-pop-marker
@@ -44,14 +44,20 @@
   (use-package d-mode :defer t))
 
 (defun d/post-init-flycheck ()
-  (spacemacs/add-flycheck-hook 'd-mode))
+  (spacemacs/enable-flycheck 'd-mode))
 
 (defun d/init-flycheck-dmd-dub ()
   (use-package flycheck-dmd-dub :defer t
-    :init (add-hook 'd-mode-hook 'flycheck-dmd-dub-set-include-path)))
+    :init
+    (progn
+      (add-hook 'd-mode-hook 'flycheck-dmd-dub-set-include-path)
+      (add-hook 'd-mode-hook 'flycheck-dmd-dub-set-variables))))
 
 (defun d/post-init-ggtags ()
   (add-hook 'd-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
+
+(defun d/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'd-mode))
 
 (defun d/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'd-mode))

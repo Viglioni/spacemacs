@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs Completion Layer packages File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -13,6 +13,7 @@
       '(
         (default-helm-config :location built-in)
         (default-ivy-config :location built-in)
+        flx-ido
         (ido :location built-in)
         (ido-vertical-mode :location built-in)
         ))
@@ -21,7 +22,7 @@
   (setq helm-prevent-escaping-from-minibuffer t
         helm-bookmark-show-location t
         helm-display-header-line nil
-        helm-split-window-in-side-p t
+        helm-split-window-inside-p t
         helm-always-two-windows t
         helm-echo-input-in-header-line t
         helm-imenu-execute-action-at-once-if-one nil
@@ -29,9 +30,9 @@
         helm-display-function 'spacemacs//display-helm-window)
   (with-eval-after-load 'helm
     (spacemacs|hide-lighter helm-mode)
-    (when (and dotspacemacs-helm-resize
-               (or (eq dotspacemacs-helm-position 'bottom)
-                   (eq dotspacemacs-helm-position 'top)))
+    (when (and helm-enable-auto-resize
+               (or (eq helm-position 'bottom)
+                   (eq helm-position 'top)))
       (setq helm-autoresize-min-height 10)
       (helm-autoresize-mode 1))
     ;; setup hooks
@@ -45,9 +46,11 @@
     (add-hook 'helm-find-files-before-init-hook
               'spacemacs//set-dotted-directory)
     (add-hook 'spacemacs-editing-style-hook 'spacemacs//helm-hjkl-navigation)
+    (add-hook 'helm-find-files-after-init-hook
+              'spacemacs//helm-find-files-enable-helm--in-fuzzy)
     ;; setup advices
-    ;; fuzzy matching for all the sourcess
-    (unless (eq dotspacemacs-helm-use-fuzzy 'source)
+    ;; fuzzy matching for all the sources
+    (unless (eq helm-use-fuzzy 'source)
       (advice-add 'helm-make-source :around #'spacemacs//helm-make-source))
 
     (defadvice spacemacs/post-theme-init
@@ -69,9 +72,9 @@
     (spacemacs|define-transient-state helm-navigation
       :title "Helm Transient State"
       :doc "
- [_j_/_k_]  next/prev candidate  [_v_]^^     persistent action     [_e_]^^    edit occurrences
- [_h_/_l_]  prev/next source     [_1_.._0_]  action 1..10          [_t_/_T_]  toggle visible/all mark
- [_q_]^^    quit                 [_a_]^^     action selection pg"
+ [_j_/_k_] next/prev candidate   [_v_]^^    persistent action    [_e_]^^   edit occurrences
+ [_h_/_l_] prev/next source      [_1_.._0_] action 1..10         [_t_/_T_] toggle visible/all mark
+ [_g_/_G_] first/last candidate  [_a_]^^    action selection pg  [_q_]^^   quit"
         :foreign-keys run
         :on-enter (spacemacs//helm-navigation-ts-on-enter)
         :on-exit  (spacemacs//helm-navigation-ts-on-exit)
@@ -99,6 +102,7 @@
         ("k" helm-previous-line)
         ("l" helm-next-source)
         ("q" nil :exit t)
+        ("M-SPC" nil :exit t)
         ("t" helm-toggle-visible-mark)
         ("T" helm-toggle-all-marks)
         ("v" helm-execute-persistent-action))
@@ -123,64 +127,26 @@
 (defun spacemacs-completion/init-default-ivy-config ()
   (with-eval-after-load 'ivy
     (setq ivy-height 15
-          ivy-re-builders-alist '((t . ivy--regex-ignore-order)))
+          ivy-re-builders-alist '((spacemacs/counsel-search . spacemacs/ivy--regex-plus)
+                                  (t . ivy--regex-ignore-order)))
     (spacemacs|hide-lighter ivy-mode)
     ;; setup hooks
     (add-hook 'spacemacs-editing-style-hook 'spacemacs//ivy-hjkl-navigation)
     ;; key bindings
     ;; ensure that the correct bindings are set at startup
     (spacemacs//ivy-hjkl-navigation dotspacemacs-editing-style)
-    ;; Transient state
-    ;; ivy-hydra disabled for now, waiting to see how the dependency management
-    ;; evolves upstream
+    ;; load ivy-hydra
     ;; (require 'ivy-hydra)
-    (spacemacs|define-transient-state ivy
-      :doc "
- Move/Resize^^^^      | Select Action^^^^   |  Call^^          |  Cancel^^    | Toggles
---^-^-^-^-------------|--^-^-^-^------------|--^---^-----------|--^-^---------|---------------------
- [_j_/_k_] by line    | [_s_/_w_] next/prev | [_RET_] & done   | [_i_] & ins  | [_C_] calling: %s(if ivy-calling \"on\" \"off\")
- [_g_/_G_] first/last | [_a_]^ ^  list all  | [_TAB_] alt done | [_q_] & quit | [_m_] matcher: %s(ivy--matcher-desc)
- [_d_/_u_] pg down/up |  ^ ^ ^ ^            | [_c_]   & cont   |  ^ ^         | [_f_] case-fold: %`ivy-case-fold-search
- [_<_/_>_] resize     |  ^ ^ ^ ^            | [_o_]   occur    |  ^ ^         | [_t_] truncate: %`truncate-lines
- [_h_/_l_] out/in dir |  ^ ^ ^ ^            |  ^ ^             |  ^ ^         |  ^ ^
-
-Current Action: %s(ivy-action-name)
-"
-      :foreign-keys run
-      :bindings
-      ;; arrows
-      ("j" ivy-next-line)
-      ("k" ivy-previous-line)
-      ("l" ivy-alt-done)
-      ("h" spacemacs/counsel-up-directory-no-error)
-      ("g" ivy-beginning-of-buffer)
-      ("G" ivy-end-of-buffer)
-      ("d" ivy-scroll-up-command)
-      ("u" ivy-scroll-down-command)
-      ;; actions
-      ("q" keyboard-escape-quit :exit t)
-      ("C-g" keyboard-escape-quit :exit t)
-      ("<escape>" keyboard-escape-quit :exit t)
-      ("i" nil)
-      ("C-o" nil)
-      ("TAB" ivy-alt-done :exit nil)
-      ;; ("C-j" ivy-alt-done :exit nil)
-      ;; ("d" ivy-done :exit t)
-      ("RET" ivy-done :exit t)
-      ("c" ivy-call)
-      ("C-m" ivy-done :exit t)
-      ("C" ivy-toggle-calling)
-      ("m" ivy-toggle-fuzzy)
-      (">" ivy-minibuffer-grow)
-      ("<" ivy-minibuffer-shrink)
-      ("w" ivy-prev-action)
-      ("s" ivy-next-action)
-      ("a" ivy-read-action)
-      ("t" (setq truncate-lines (not truncate-lines)))
-      ("f" ivy-toggle-case-fold)
-      ("o" ivy-occur :exit t))
-    (define-key ivy-minibuffer-map "\C-o" 'spacemacs/ivy-transient-state/body)
+    ;; Using the original ivy-hydra might lead to some buggy behavior. Therefore
+    ;; previously a customized transient state was found here. This customized
+    ;; transient state was removed after commit
+    ;; d46eacd83842815b24afcb2e1fee5c80c38187c5
     ))
+
+(defun spacemacs-completion/init-flx-ido ()
+  (use-package flx-ido
+    :defer t
+    :init (add-hook 'ido-vertical-mode-hook 'flx-ido-mode)))
 
 (defun spacemacs-completion/init-ido ()
   (setq ido-save-directory-list-file
@@ -191,9 +157,10 @@ Current Action: %s(ivy-action-name)
 
 (defun spacemacs-completion/init-ido-vertical-mode ()
   (use-package ido-vertical-mode
+    :defer t
     :init
     (progn
-      (ido-vertical-mode t)
+      (add-hook 'ido-minibuffer-setup-hook ido-vertical-mode)
       (add-hook 'ido-minibuffer-setup-hook 'spacemacs//ido-minibuffer-setup)
       (add-hook 'ido-setup-hook 'spacemacs//ido-setup)
 
@@ -219,13 +186,13 @@ Current Action: %s(ivy-action-name)
           (switch-to-buffer this-buffer)
           result))
 
-      (defvar spacemacs--ido-navigation-ms-enabled nil
+      (defvar spacemacs--ido-navigation-ts-enabled nil
         "Flag which is non nil when ido navigation transient-state is enabled.")
 
-      (defvar spacemacs--ido-navigation-ms-face-cookie-minibuffer nil
+      (defvar spacemacs--ido-navigation-ts-face-cookie-minibuffer nil
         "Cookie pointing to the local face remapping.")
 
-      (defface spacemacs-ido-navigation-ms-face
+      (defface spacemacs-ido-navigation-ts-face
         `((t :background ,(face-attribute 'error :foreground)
              :foreground "black"
              :weight bold))
@@ -235,10 +202,10 @@ Current Action: %s(ivy-action-name)
       (spacemacs|define-transient-state ido-navigation
         :title "ido Transient State"
         :foreign-keys run
-        :on-enter (spacemacs//ido-navigation-ms-on-enter)
-        :on-exit  (spacemacs//ido-navigation-ms-on-exit)
+        :on-enter (spacemacs//ido-navigation-ts-on-enter)
+        :on-exit  (spacemacs//ido-navigation-ts-on-exit)
         :bindings
-        ;;("?" nil (spacemacs//ido-navigation-ms-full-doc))
+        ;;("?" nil (spacemacs//ido-navigation-ts-full-doc))
         ("<RET>" ido-exit-minibuffer :exit t)
         ("<escape>" nil :exit t)
         ("e" ido-select-text :exit t)

@@ -1,6 +1,6 @@
 ;;; core-funcs.el --- Spacemacs Core File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -14,6 +14,11 @@
 (defvar spacemacs-repl-list '()
   "List of all registered REPLs.")
 
+(defmacro spacemacs|dotspacemacs-backward-compatibility (variable default)
+  "Return `if' sexp for backward compatibility with old dotspacemacs
+values."
+  `(if (boundp ',variable) ,variable ',default))
+
 (defun spacemacs/system-is-mac ()
   (eq system-type 'darwin))
 (defun spacemacs/system-is-linux ()
@@ -25,17 +30,7 @@
   ;; ns is returned instead of mac on Emacs 25+
   (memq (window-system) '(mac ns)))
 
-(defun spacemacs/run-prog-mode-hooks ()
-  "Runs `prog-mode-hook'. Useful for modes that don't derive from
-`prog-mode' but should."
-  (run-hooks 'prog-mode-hook))
-
-(defun spacemacs/run-text-mode-hooks ()
-  "Runs `text-mode-hook'. Useful for modes that don't derive from
-`text-mode' but should."
-  (run-hooks 'text-mode-hook))
-
-(defun spacemacs/mplist-get (plist prop)
+(defun spacemacs/mplist-get-values (plist prop)
   "Get the values associated to PROP in PLIST, a modified plist.
 
 A modified plist is one where keys are keywords and values are
@@ -54,6 +49,21 @@ Currently this function infloops when the list is circular."
     (while (and (consp tail) (not (keywordp (car tail))))
       (push (pop tail) result))
     (nreverse result)))
+
+(defun spacemacs/mplist-get-value (plist prop)
+  "Get a single value associated to PROP in PLIST, a modified plist.
+
+You should always use this function instead of builtin `plist-get'
+in Spacemacs.
+
+A modified plist is one where keys are keywords and values are
+all non-keywords elements that follow it.
+
+If there are multiple properties with the same keyword, only the first property
+and its values is returned.
+
+Currently this function infloops when the list is circular."
+  (car (spacemacs/mplist-get-values plist prop)))
 
 (defun spacemacs/mplist-remove (plist prop)
   "Return a copy of a modified PLIST without PROP and its values.
@@ -76,21 +86,22 @@ and its values are removed."
 (defun spacemacs/dump-vars-to-file (varlist filename)
   "simplistic dumping of variables in VARLIST to a file FILENAME"
   (with-temp-file filename
-    (spacemacs/dump varlist (current-buffer))
+    (spacemacs/dump-vars varlist (current-buffer))
     (make-directory (file-name-directory filename) t)))
 
 ;; From http://stackoverflow.com/questions/2321904/elisp-how-to-save-data-in-a-file
-(defun spacemacs/dump (varlist buffer)
+(defun spacemacs/dump-vars (varlist buffer)
   "insert into buffer the setq statement to recreate the variables in VARLIST"
   (cl-loop for var in varlist do
-        (print (list 'setq var (list 'quote (symbol-value var)))
-               buffer)))
+           (print (list 'setq var (list 'quote (symbol-value var)))
+                  buffer)))
 
 (defvar spacemacs--init-redisplay-count 0
   "The number of calls to `redisplay'")
 (defun spacemacs//redisplay ()
   "`redisplay' wrapper."
   (setq spacemacs--init-redisplay-count (1+ spacemacs--init-redisplay-count))
+  (force-window-update)
   (redisplay))
 
 (defun spacemacs//create-key-binding-form (props func)
@@ -112,24 +123,24 @@ Supported properties:
 `:define-key CONS CELL'
     One or several cons cells (MAP . KEY) where MAP is a mode map and KEY is a
     key sequence string to be set with `define-key'. "
-  (let ((evil-leader (spacemacs/mplist-get props :evil-leader))
-        (evil-leader-for-mode (spacemacs/mplist-get props :evil-leader-for-mode))
-        (global-key (spacemacs/mplist-get props :global-key))
-        (def-key (spacemacs/mplist-get props :define-key)))
+  (let ((evil-leader (spacemacs/mplist-get-values props :evil-leader))
+        (evil-leader-for-mode (spacemacs/mplist-get-values props :evil-leader-for-mode))
+        (global-key (spacemacs/mplist-get-values props :global-key))
+        (def-key (spacemacs/mplist-get-values props :define-key)))
     (append
      (when evil-leader
        `((dolist (key ',evil-leader)
-            (spacemacs/set-leader-keys key ',func))))
+           (spacemacs/set-leader-keys key ',func))))
      (when evil-leader-for-mode
        `((dolist (val ',evil-leader-for-mode)
-          (spacemacs/set-leader-keys-for-major-mode
-            (car val) (cdr val) ',func))))
+           (spacemacs/set-leader-keys-for-major-mode
+             (car val) (cdr val) ',func))))
      (when global-key
        `((dolist (key ',global-key)
-          (global-set-key (kbd key) ',func))))
+           (global-set-key (kbd key) ',func))))
      (when def-key
        `((dolist (val ',def-key)
-          (define-key (eval (car val)) (kbd (cdr val)) ',func)))))))
+           (define-key (eval (car val)) (kbd (cdr val)) ',func)))))))
 
 (defun spacemacs/prettify-org-buffer ()
   "Apply visual enchantments to the current buffer.
@@ -137,20 +148,19 @@ The buffer's major mode should be `org-mode'."
   (interactive)
   (unless (derived-mode-p 'org-mode)
     (user-error "org-mode should be enabled in the current buffer."))
-
-  ;; Make ~SPC ,~ work, reference:
-  ;; http://stackoverflow.com/questions/24169333/how-can-i-emphasize-or-verbatim-quote-a-comma-in-org-mode
-  (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n")
-  (org-set-emph-re 'org-emphasis-regexp-components org-emphasis-regexp-components)
-  (setq-local org-emphasis-alist '(("*" bold)
-                                   ("/" italic)
-                                   ("_" underline)
-                                   ("=" org-verbatim verbatim)
-                                   ("~" org-kbd)
-                                   ("+"
-                                    (:strike-through t))))
-  (when (require 'space-doc nil t)
-    (space-doc-mode)))
+  (if (require 'space-doc nil t)
+      (space-doc-mode)
+    ;; Make ~SPC ,~ work, reference:
+    ;; http://stackoverflow.com/questions/24169333/how-can-i-emphasize-or-verbatim-quote-a-comma-in-org-mode
+    (setcar (nthcdr 2 org-emphasis-regexp-components) " \t\n")
+    (org-set-emph-re 'org-emphasis-regexp-components org-emphasis-regexp-components)
+    (setq-local org-emphasis-alist '(("*" bold)
+                                     ("/" italic)
+                                     ("_" underline)
+                                     ("=" org-verbatim verbatim)
+                                     ("~" org-kbd)
+                                     ("+"
+                                      (:strike-through t))))))
 
 (defun spacemacs/view-org-file (file &optional anchor-text expand-scope)
   "Open org file and apply visual enchantments.
@@ -169,7 +179,7 @@ If EXPAND-SCOPE is `all' then run `outline-show-all' at the matched line."
     ;; If `anchor-text' is GitHub style link.
     (if (string-prefix-p "#" anchor-text)
         ;; If the toc-org package is loaded.
-        (if (configuration-layer/package-usedp 'toc-org)
+        (if (configuration-layer/package-used-p 'toc-org)
             ;; For each heading. Search the heading that corresponds
             ;; to `anchor-text'.
             (while (and (re-search-forward "^[\\*]+\s\\(.*\\).*$" nil t)
@@ -201,7 +211,7 @@ passed-tests and total-tests."
           (when (boundp 'passed-tests) (setq passed-tests (1+ passed-tests)))
           (insert (format "*** PASS: %s\n" var-val)))
       (insert (propertize (format "*** FAIL: %s\n" var-val)
-                                  'font-lock-face 'font-lock-warning-face)))))
+                          'font-lock-face 'font-lock-warning-face)))))
 
 (defun spacemacs//test-list (pred varlist test-desc &optional element-desc)
   "Test PRED against each element of VARLIST and print test
@@ -249,11 +259,30 @@ result, incrementing passed-tests and total-tests."
      (concat "Hidden Mode Line Mode enabled.  "
              "Use M-x hidden-mode-line-mode to make the mode-line appear."))))
 
-(defun spacemacs/recompile-elpa ()
-  "Recompile packages in elpa directory. Useful if you switch
-Emacs versions."
-  (interactive)
-  (byte-recompile-directory package-user-dir nil t))
+;; https://github.com/syl20bnr/spacemacs/issues/8414
+(defun spacemacs/recompile-elpa (arg &optional dir)
+  "Compile or recompile packages in elpa or given directory.
+This function compiles all `.el' files in the elpa directory
+if it's corresponding `.elc' file is missing or outdated.
+
+This is useful if you switch Emacs versions or there
+are issues with a local package which require a recompile.
+
+If ARG is non-nil, force recompile of all found `.el' files.
+If DIR is non-nil, use a given directory for recompilation instead of elpa."
+  (interactive "P")
+  ;; Replace default directories if dir parameter is filled
+  (let ((user-emacs-dir (or dir user-emacs-directory))
+        (package-user-dir (or dir package-user-dir)))
+    ;; First argument must be 0 (not nil) to get missing .elc files rebuilt.
+    ;; Bonus: Optionally force recompilation with universal ARG
+    (when arg
+      (seq-do
+       (lambda (fname)
+         (when (file-exists-p fname)
+           (delete-file fname)))
+       (directory-files-recursively user-emacs-directory "\\.elc$" t)))
+    (byte-recompile-directory package-user-dir 0 arg)))
 
 (defun spacemacs/register-repl (feature repl-func &optional tag)
   "Register REPL-FUNC to the global list of REPLs SPACEMACS-REPL-LIST.
@@ -266,26 +295,11 @@ buffer."
 
 ;; http://stackoverflow.com/questions/11847547/emacs-regexp-count-occurrences
 (defun spacemacs/how-many-str (regexp str)
-  (loop with start = 0
-        for count from 0
-        while (string-match regexp str start)
-        do (setq start (match-end 0))
-        finally return count))
-
-;; from https://github.com/cofi/dotfiles/blob/master/emacs.d/config/cofi-util.el#L38
-(defun spacemacs/add-to-hooks (fun hooks)
-  "Add function to hooks"
-  (dolist (hook hooks)
-    (add-hook hook fun)))
-
-(defun spacemacs/add-all-to-hook (hook &rest funs)
-  "Add functions to hook."
-  (spacemacs/add-to-hook hook funs))
-
-(defun spacemacs/add-to-hook (hook funs)
-  "Add list of functions to hook."
-  (dolist (fun funs)
-    (add-hook hook fun)))
+  (cl-loop with start = 0
+           for count from 0
+           while (string-match regexp str start)
+           do (setq start (match-end 0))
+           finally return count))
 
 (defun spacemacs/echo (msg &rest args)
   "Display MSG in echo-area without logging it in *Messages* buffer."
@@ -304,21 +318,28 @@ buffer."
 
 (defun spacemacs/alternate-buffer (&optional window)
   "Switch back and forth between current and last buffer in the
-current window."
+current window.
+
+If `spacemacs-layouts-restrict-spc-tab' is `t' then this only switches between
+the current layouts buffers."
   (interactive)
-  (let ((current-buffer (window-buffer window))
-        (buffer-predicate
-         (frame-parameter (window-frame window) 'buffer-predicate)))
-    ;; switch to first buffer previously shown in this window that matches
-    ;; frame-parameter `buffer-predicate'
-    (switch-to-buffer
-     (or (cl-find-if (lambda (buffer)
-                       (and (not (eq buffer current-buffer))
-                            (or (null buffer-predicate)
-                                (funcall buffer-predicate buffer))))
-                     (mapcar #'car (window-prev-buffers window)))
-         ;; `other-buffer' honors `buffer-predicate' so no need to filter
-         (other-buffer current-buffer t)))))
+  (cl-destructuring-bind (buf start pos)
+      (if (bound-and-true-p spacemacs-layouts-restrict-spc-tab)
+          (let ((buffer-list (persp-buffer-list))
+                (my-buffer (window-buffer window)))
+            ;; find buffer of the same persp in window
+            (seq-find (lambda (it) ;; predicate
+                        (and (not (eq (car it) my-buffer))
+                             (member (car it) buffer-list)))
+                      (window-prev-buffers)
+                      ;; default if found none
+                      (list nil nil nil)))
+        (or (cl-find (window-buffer window) (window-prev-buffers)
+                     :key #'car :test-not #'eq)
+            (list (other-buffer) nil nil)))
+    (if (not buf)
+        (message "Last buffer not found.")
+      (set-window-buffer-start-and-point window buf start pos))))
 
 (defun spacemacs/alternate-window ()
   "Switch back and forth between current and last window in the
@@ -344,8 +365,7 @@ current frame."
 Delegates to flycheck if it is enabled and the next-error buffer
 is not visible. Otherwise delegates to regular Emacs next-error."
   (if (and (bound-and-true-p flycheck-mode)
-           (let ((buf (ignore-errors (next-error-find-buffer))))
-             (not (and buf (get-buffer-window buf)))))
+           (not next-error-function))
       'flycheck
     'emacs))
 
@@ -356,6 +376,13 @@ is not visible. Otherwise delegates to regular Emacs next-error."
     (cond
      ((eq 'flycheck sys) (call-interactively 'flycheck-next-error))
      ((eq 'emacs sys) (call-interactively 'next-error)))))
+
+(defun spacemacs/last-error ()
+  "Go to last flycheck or standard emacs error."
+  (interactive)
+  (when (save-excursion (spacemacs/next-error))
+    (evil-goto-line)
+    (spacemacs/previous-error)))
 
 (defun spacemacs/previous-error (&optional n reset)
   "Dispatch to flycheck or standard emacs error."
@@ -389,8 +416,24 @@ set."
         (min spacemacs--gne-max-line
              (max spacemacs--gne-min-line
                   (+ num spacemacs--gne-cur-line))))
-  (goto-line spacemacs--gne-cur-line)
+  (goto-char (point-min))
+  (forward-line (1- spacemacs--gne-cur-line))
   (funcall spacemacs--gne-line-func
            (buffer-substring (point-at-bol) (point-at-eol))))
+
+(defun spacemacs/terminal-fix-mode-line-indicator-overlap (str)
+  "Add a space between two mode line indicators,
+to fix an overlapping issue, that occurs when
+Spacemacs is started in a terminal,
+and a modes mode line name is diminished to:
+- A unicode character followed by a non unicode character, ex: \" Ⓔh\"
+- Or to two unicode characters, ex: \" Ⓔⓗ\""
+  (let ((first-char (substring str 1 2)) ; first char after the space
+        second-char)
+    (if (equal (char-charset (string-to-char first-char)) 'unicode)
+        (progn
+          (setq second-char (substring str 2 3)) ; second char after the space
+          (concat first-char " " second-char))
+      str)))
 
 (provide 'core-funcs)

@@ -1,6 +1,6 @@
-;;; layers.el --- Spacemacs Layer layers File
+;;; layers.el --- Spacemacs distribution Layer layers File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,25 +9,26 @@
 ;;
 ;;; License: GPLv3
 
-(configuration-layer/declare-layers '(spacemacs-base
-                                      spacemacs-completion
-                                      spacemacs-layouts
-                                      spacemacs-editing
-                                      spacemacs-editing-visual
-                                      spacemacs-evil
-                                      spacemacs-language
-                                      spacemacs-misc
-                                      spacemacs-ui
-                                      spacemacs-ui-visual
-                                      spacemacs-org))
-;; If the user has not explicitly declared `helm' or `ivy'
-;; and they are using the standard distribution, assume they
-;; want `helm' completion.
-(unless (or (configuration-layer/layer-usedp 'ivy)
-            (configuration-layer/layer-usedp 'helm))
-  (configuration-layer/declare-layers '(helm)))
-
-(when (and (configuration-layer/layer-usedp 'ivy)
-           (configuration-layer/layer-usedp 'helm))
-  (spacemacs-buffer/warning (concat "Both the `helm' and `ivy' layers are enabled. "
-                             "This may lead to unexpected behaviour.")))
+;; We use `spacemacs/declare-layers' instead of
+;; `configuration-layer/declare-layer-dependencies' in order to declare
+;; the layers right away
+;; This is a special case only for distribution layers.
+(configuration-layer/declare-layers
+ '(
+   helm
+   treemacs
+   spacemacs-base
+   spacemacs-completion
+   spacemacs-layouts
+   spacemacs-editing
+   spacemacs-editing-visual
+   spacemacs-evil
+   spacemacs-language
+   spacemacs-misc
+   spacemacs-modeline
+   spacemacs-navigation
+   spacemacs-org
+   spacemacs-project
+   spacemacs-purpose
+   spacemacs-visual
+   ))

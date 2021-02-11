@@ -1,6 +1,6 @@
 ;;; layers.el --- Django Layer layers File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Andrea Moretti <axyzxp@gmail.com>
 ;; URL: https://github.com/axyz
@@ -11,4 +11,4 @@
 
 ;; Prerequisites
 
-(configuration-layer/declare-layer 'python)
+(configuration-layer/declare-layer-dependencies '(python))

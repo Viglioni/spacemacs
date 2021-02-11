@@ -1,6 +1,6 @@
 ;;; funcs.el --- Spacemacs Evil Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -41,21 +41,25 @@ Otherwise, revert to the default behavior (i.e. enable `evil-insert-state')."
     (evil-put-property 'evil-state-properties 'iedit-insert
                        :enable states)))
 
-
-;; evil-search-highlight-persist
+(defun spacemacs//iedit-state-TAB-key-bindings (style)
+  "Set the action for TAB key in iedit state."
+  (if (memq style '(vim hybrid))
+      (progn
+        (define-key iedit-occurrence-keymap-default
+          (kbd "TAB") 'iedit-toggle-selection)
+        (define-key iedit-occurrence-keymap-default
+          [tab] 'iedit-toggle-selection))
+    (progn
+      (define-key iedit-occurrence-keymap-default
+        (kbd "TAB") 'iedit-next-occurrence)
+      (define-key iedit-occurrence-keymap-default
+        [tab] 'iedit-next-occurrence))))
 
-(defun spacemacs/evil-search-clear-highlight ()
-  "Clear evil-search or evil-ex-search persistent highlights."
-  (interactive)
-  (case evil-search-module
-    ('isearch (evil-search-highlight-persist-remove-all))
-    ('evil-search (evil-ex-nohighlight))))
-
-(defun spacemacs//adaptive-evil-highlight-persist-face ()
-  (set-face-attribute 'evil-search-highlight-persist-highlight-face nil
-                      :inherit 'lazy-highlight
-                      :background nil
-                      :foreground nil))
+(defun spacemacs//evil-escape-deactivate-in-holy-mode  (style)
+  "Deactivate `evil-escape' if STYLE is `emacs' otherwise enable it."
+  (if (memq style '(vim hybrid))
+      (evil-escape-mode t)
+    (evil-escape-mode -1)))
 
 (defun spacemacs/linum-relative-toggle ()
   (interactive)
@@ -74,3 +78,10 @@ Otherwise, revert to the default behavior (i.e. enable `evil-insert-state')."
   "Disable `vi-tilde-fringe' in the current buffer if it is read only."
   (when buffer-read-only
     (spacemacs/disable-vi-tilde-fringe)))
+
+
+;; lisp state
+
+(defun spacemacs//load-evil-lisp-state ()
+  "Load evil-lisp-state lazily"
+  (require 'evil-lisp-state))

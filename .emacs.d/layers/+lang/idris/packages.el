@@ -1,24 +1,26 @@
 ;;; packages.el --- Idris Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
-;; Author: Timothy Jones <git@zmthy.io>
+;; Author: Timothy Jones <tim@zmthy.net>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
 
-(setq idris-packages '(company
-                       idris-mode
-                       golden-ratio
-                       popwin))
+(setq idris-packages
+      '(
+        company
+        idris-mode
+        golden-ratio
+        popwin
+        ))
 
 (defun idris/post-init-company ()
-  (spacemacs|add-company-hook idris-mode)
-  (spacemacs|add-company-hook idris-repl-mode)
-  (push 'company-capf company-backends-idris-mode)
-  (push 'company-capf company-backends-idris-repl-mode))
+  (spacemacs|add-company-backends
+    :backends company-capf
+    :modes idris-mode idris-repl-mode))
 
 (defun idris/init-idris-mode ()
   (use-package idris-mode
@@ -104,6 +106,12 @@
         "sP" 'spacemacs/idris-load-backward-line-and-focus
         "ss" 'idris-pop-to-repl
         "sq" 'idris-quit)))
+
+  ;; To suppress auto-indentation
+  (add-to-list 'spacemacs-indent-sensitive-modes 'idris-mode)
+
+  ;; To bind TAB to the indentation command for all Idris buffers
+  (add-hook 'idris-mode-hook 'turn-on-idris-simple-indent)
 
   ;; open special buffers in motion state so they can be closed with ~q~
   (evil-set-initial-state 'idris-compiler-notes-mode 'motion)

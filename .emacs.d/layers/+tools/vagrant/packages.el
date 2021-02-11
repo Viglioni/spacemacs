@@ -1,6 +1,6 @@
 ;;; packages.el --- Vagrant Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Brian Hicks <brian@brianthicks.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,24 +9,24 @@
 ;;
 ;;; License: GPLv3
 (setq vagrant-packages '(vagrant
-                           vagrant-tramp))
+                         vagrant-tramp))
 
 (defun vagrant/init-vagrant ()
   (use-package vagrant
     :defer t
     :init
     (progn
-      (spacemacs/declare-prefix "V" "vagrant")
+      (spacemacs/declare-prefix "atv" "vagrant")
       (spacemacs/set-leader-keys
-        "VD" 'vagrant-destroy
-        "Ve" 'vagrant-edit
-        "VH" 'vagrant-halt
-        "Vp" 'vagrant-provision
-        "Vr" 'vagrant-resume
-        "VR" 'vagrant-reload
-        "Vs" 'vagrant-status
-        "VS" 'vagrant-suspend
-        "VV" 'vagrant-up))))
+        "atvD" 'vagrant-destroy
+        "atve" 'vagrant-edit
+        "atvH" 'vagrant-halt
+        "atvp" 'vagrant-provision
+        "atvr" 'vagrant-resume
+        "atvR" 'vagrant-reload
+        "atvs" 'vagrant-status
+        "atvS" 'vagrant-suspend
+        "atvV" 'vagrant-up))))
 
 (defun vagrant/init-vagrant-tramp ()
   (use-package vagrant-tramp
@@ -39,4 +39,4 @@
         (unless spacemacs--vagrant-tramp-loaded
           (vagrant-tramp-add-method)
           (setq spacemacs--vagrant-tramp-loaded t)))
-      (spacemacs/set-leader-keys "Vt" 'vagrant-tramp-term))))
+      (spacemacs/set-leader-keys "atvt" 'vagrant-tramp-term))))

@@ -1,6 +1,6 @@
-;;; packages.el --- Nim Configuration Layer for Spacemacs
+;;; config.el --- Nim Configuration Layer for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Max Gonzih
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -11,7 +11,9 @@
 
 ;; Variables
 
-(spacemacs|defvar-company-backends nim-mode)
-(spacemacs|defvar-company-backends nimscript-mode)
-
 (spacemacs|define-jump-handlers nim-mode)
+
+(defvar nim-backend nil
+  "The backend to use for IDE features.
+Possible values are `lsp' and `company-nim'.
+If `nil' then 'company-nim` is the default backend unless `lsp' layer is used")

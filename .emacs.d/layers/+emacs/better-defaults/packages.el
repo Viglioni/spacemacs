@@ -1,6 +1,6 @@
 ;;; packages.el --- Better Emacs Defaults Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Thomas de Beauchêne <thomas.de.beauchene@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -10,8 +10,10 @@
 ;;; License: GPLv3
 
 (defconst better-defaults-packages
-  '(mwim
-    unfill)
+  '(
+    mwim
+    unfill
+    )
   "The list of Lisp packages required by the mwim layer.")
 
 (defun better-defaults/init-mwim ()

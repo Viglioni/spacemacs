@@ -1,6 +1,6 @@
 ;;; funcs.el --- Version control functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -8,6 +8,10 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+
+(defun spacemacs/diff-mode-revert-hunk ()
+  (interactive)
+  (diff-apply-hunk t))
 
 (defun spacemacs/vcs-next-hunk ()
   (interactive)
@@ -29,7 +33,8 @@
 
 (defun spacemacs/vcs-revert-hunk ()
   (interactive)
-  (let ((current-prefix-arg t))
+  (let ((current-prefix-arg t)
+        (inhibit-modification-hooks t))
     (call-interactively
      (cl-case version-control-diff-tool
        (diff-hl     'diff-hl-revert-hunk)
@@ -123,3 +128,30 @@
   :off (spacemacs/vcs-disable-margin-globally)
   :documentation "Enable diff margins globally."
   :evil-leader "T C-d")
+
+(defun spacemacs//smerge-ts-hint ()
+  "Return a hint for the smerge transient state.
+Return a string indicating the index of the current conflict and
+the number of conflicts detected by `smerge-mode'."
+  (concat
+   (cl-loop for ol being the overlays
+            with pos = (point)
+            if (eq (overlay-get ol 'smerge) 'conflict)
+            count ol into total
+            and if (<= (overlay-start ol) pos)
+            count ol into idx
+            finally return (format "conflict [%d/%d]" idx total))
+   (if spacemacs--smerge-ts-full-hint-toggle
+       spacemacs--smerge-ts-full-hint
+     (concat "  (["
+             (propertize "?" 'face 'hydra-face-red)
+             "] help)"))))
+
+(defun spacemacs//smerge-ts-toggle-hint ()
+  "Toggle the full hint docstring for the smerge transient state."
+  (interactive)
+  (setq spacemacs--smerge-ts-full-hint-toggle
+        (not spacemacs--smerge-ts-full-hint-toggle)))
+
+(defun spacemacs//git-gutter+-refresh-in-all-buffers ()
+  (git-gutter+-in-all-buffers (when git-gutter+-mode (git-gutter+-refresh))))

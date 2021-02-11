@@ -1,6 +1,6 @@
 ;;; packages.el --- games Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -13,7 +13,7 @@
       '(
         2048-game
         (helm-games :location local
-                    :toggle (configuration-layer/package-usedp 'helm))
+                    :requires helm)
         pacmacs
         (tetris :location built-in)
         sudoku
@@ -38,8 +38,8 @@
     :commands helm-games
     :init
     (progn
-      (spacemacs/declare-prefix "aG" "games")
-      (spacemacs/set-leader-keys "aG" 'helm-games))))
+      (spacemacs/declare-prefix "afg" "games")
+      (spacemacs/set-leader-keys "afg" 'helm-games))))
 
 (defun games/init-pacmacs ()
   (use-package pacmacs

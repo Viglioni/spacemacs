@@ -1,6 +1,6 @@
 ;;; packages.el --- Markdown Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,7 +9,7 @@
 ;;
 ;;; License: GPLv3
 
-(setq markdown-packages
+(defconst markdown-packages
   '(
     company
     company-emoji
@@ -18,16 +18,22 @@
     markdown-mode
     markdown-toc
     mmm-mode
+    org
     smartparens
-    (vmd-mode :toggle (eq 'vmd markdown-live-preview-engine))
-    ))
+    valign
+    (vmd-mode :toggle (eq 'vmd markdown-live-preview-engine))))
 
 (defun markdown/post-init-company ()
-  (spacemacs|add-company-hook markdown-mode)
-  (push 'company-capf company-backends-markdown-mode))
+  (dolist (mode markdown--key-bindings-modes)
+    (eval `(spacemacs|add-company-backends
+             :backends company-capf
+             :modes ,mode))))
 
 (defun markdown/post-init-company-emoji ()
-  (push 'company-emoji company-backends-markdown-mode))
+  (dolist (mode markdown--key-bindings-modes)
+    (eval `(spacemacs|add-company-backends
+             :backends company-emoji
+             :modes ,mode))))
 
 (defun markdown/post-init-emoji-cheat-sheet-plus ()
   (add-hook 'markdown-mode-hook 'emoji-cheat-sheet-plus-display-mode))
@@ -36,111 +42,135 @@
   (use-package gh-md
     :defer t
     :init
-    (spacemacs/set-leader-keys-for-major-mode 'markdown-mode
-      "cr"  'gh-md-render-buffer)))
+    (dolist (mode markdown--key-bindings-modes)
+      (spacemacs/set-leader-keys-for-major-mode mode
+        "cr" 'gh-md-render-buffer))))
+
+(defun markdown/post-init-valign ()
+  (add-hook 'markdown-mode-hook 'valign-mode))
 
 (defun markdown/post-init-smartparens ()
   (add-hook 'markdown-mode-hook 'smartparens-mode))
 
 (defun markdown/init-markdown-mode ()
   (use-package markdown-mode
-    :mode ("\\.m[k]d" . markdown-mode)
+    :mode
+    (("\\.mkd\\'" . markdown-mode)
+     ("\\.mdk\\'" . markdown-mode)
+     ("\\.mdx\\'" . markdown-mode))
     :defer t
     :config
     (progn
-      ;; stolen from http://stackoverflow.com/a/26297700
-      ;; makes markdown tables saner via orgtbl-mode
-      (require 'org-table)
-      (defun cleanup-org-tables ()
-        (save-excursion
-          (goto-char (point-min))
-          (while (search-forward "-+-" nil t) (replace-match "-|-"))))
-      (add-hook 'markdown-mode-hook 'orgtbl-mode)
-      (add-hook 'markdown-mode-hook
-                (lambda()
-                  (add-hook 'after-save-hook 'cleanup-org-tables  nil 'make-it-local)))
-      ;; Insert key for org-mode and markdown a la C-h k
-      ;; from SE endless http://emacs.stackexchange.com/questions/2206/i-want-to-have-the-kbd-tags-for-my-blog-written-in-org-mode/2208#2208
-      (defun spacemacs/insert-keybinding-markdown (key)
-        "Ask for a key then insert its description.
-Will work on both org-mode and any mode that accepts plain html."
-        (interactive "kType key sequence: ")
-        (let* ((tag "~%s~"))
-          (if (null (equal key "\r"))
-              (insert
-               (format tag (help-key-description key nil)))
-            (insert (format tag ""))
-            (forward-char -6))))
+      ;; Make markdown-mode behave a bit more like org w.r.t. code blocks i.e.
+      ;; use proper syntax highlighting
+      (setq markdown-fontify-code-blocks-natively t)
+
+      ;; set the markdown-command
+      (setq markdown-command
+            (if-let ((command (cl-loop for cmd in (if markdown-executable
+                                                      (list markdown-executable)
+                                                    (list "markdown" "pandoc" "markdown_py"))
+                                       when (executable-find cmd)
+                                       return (file-name-nondirectory it))))
+                command
+              (user-error (if markdown-executable
+                              (format "Cannot find markdown-executable %s" markdown-executable)
+                            "Please refer to the layer documentation and install a markdown command"))))
 
       ;; Declare prefixes and bind keys
       (dolist (prefix '(("mc" . "markdown/command")
                         ("mh" . "markdown/header")
                         ("mi" . "markdown/insert")
                         ("ml" . "markdown/lists")
+                        ("mt" . "markdown/table")
+                        ("mT" . "markdown/toggle")
                         ("mx" . "markdown/text")))
-        (spacemacs/declare-prefix-for-mode
-         'markdown-mode (car prefix) (cdr prefix)))
-      (spacemacs/set-leader-keys-for-major-mode 'markdown-mode
-        ;; Movement
-        "{"   'markdown-backward-paragraph
-        "}"   'markdown-forward-paragraph
-        ;; Completion, and Cycling
-        "]"   'markdown-complete
-        ;; Indentation
-        ">"   'markdown-indent-region
-        "<"   'markdown-exdent-region
-        ;; Buffer-wide commands
-        "c]"  'markdown-complete-buffer
-        "cc"  'markdown-check-refs
-        "ce"  'markdown-export
-        "cm"  'markdown-other-window
-        "cn"  'markdown-cleanup-list-numbers
-        "co"  'markdown-open
-        "cp"  'markdown-preview
-        "cv"  'markdown-export-and-preview
-        "cw"  'markdown-kill-ring-save
-        ;; headings
-        "hi"  'markdown-insert-header-dwim
-        "hI"  'markdown-insert-header-setext-dwim
-        "h1"  'markdown-insert-header-atx-1
-        "h2"  'markdown-insert-header-atx-2
-        "h3"  'markdown-insert-header-atx-3
-        "h4"  'markdown-insert-header-atx-4
-        "h5"  'markdown-insert-header-atx-5
-        "h6"  'markdown-insert-header-atx-6
-        "h!"  'markdown-insert-header-setext-1
-        "h@"  'markdown-insert-header-setext-2
-        ;; Insertion of common elements
-        "-"   'markdown-insert-hr
-        "if"  'markdown-insert-footnote
-        "ii"  'markdown-insert-image
-        "ik"  'spacemacs/insert-keybinding-markdown
-        "iI"  'markdown-insert-reference-image
-        "il"  'markdown-insert-link
-        "iL"  'markdown-insert-reference-link-dwim
-        "iw"  'markdown-insert-wiki-link
-        "iu"  'markdown-insert-uri
-        ;; Element removal
-        "k"   'markdown-kill-thing-at-point
-        ;; List editing
-        "li"  'markdown-insert-list-item
-        ;; region manipulation
-        "xb"  'markdown-insert-bold
-        "xi"  'markdown-insert-italic
-        "xc"  'markdown-insert-code
-        "xC"  'markdown-insert-gfm-code-block
-        "xq"  'markdown-insert-blockquote
-        "xQ"  'markdown-blockquote-region
-        "xp"  'markdown-insert-pre
-        "xP"  'markdown-pre-region
-        ;; Following and Jumping
-        "N"   'markdown-next-link
-        "f"   'markdown-follow-thing-at-point
-        "P"   'markdown-previous-link
-        "<RET>" 'markdown-jump)
-      (when (eq 'eww markdown-live-preview-engine)
-        (spacemacs/set-leader-keys-for-major-mode 'markdown-mode
-          "cP"  'markdown-live-preview-mode))
+        (dolist (mode markdown--key-bindings-modes)
+          (spacemacs/declare-prefix-for-mode
+            mode (car prefix) (cdr prefix))))
+      (dolist (mode markdown--key-bindings-modes)
+        (spacemacs/set-leader-keys-for-major-mode mode
+          ;; rebind this so terminal users can use it
+          "M-RET" 'markdown-insert-list-item
+          ;; Movement
+          "{"   'markdown-backward-paragraph
+          "}"   'markdown-forward-paragraph
+          ;; Completion, and Cycling
+          "]"   'markdown-complete
+          ;; Indentation
+          ">"   'markdown-indent-region
+          "<"   'markdown-outdent-region
+          ;; Buffer-wide commands
+          "c]"  'markdown-complete-buffer
+          "cc"  'markdown-check-refs
+          "ce"  'markdown-export
+          "cm"  'markdown-other-window
+          "cn"  'markdown-cleanup-list-numbers
+          "co"  'markdown-open
+          "cp"  'markdown-preview
+          "cv"  'markdown-export-and-preview
+          "cw"  'markdown-kill-ring-save
+          ;; headings
+          "hi"  'markdown-insert-header-dwim
+          "hI"  'markdown-insert-header-setext-dwim
+          "h1"  'markdown-insert-header-atx-1
+          "h2"  'markdown-insert-header-atx-2
+          "h3"  'markdown-insert-header-atx-3
+          "h4"  'markdown-insert-header-atx-4
+          "h5"  'markdown-insert-header-atx-5
+          "h6"  'markdown-insert-header-atx-6
+          "h!"  'markdown-insert-header-setext-1
+          "h@"  'markdown-insert-header-setext-2
+          ;; Insertion of common elements
+          "-"   'markdown-insert-hr
+          "if"  'markdown-insert-footnote
+          "ii"  'markdown-insert-image
+          "ik"  'spacemacs/insert-keybinding-markdown
+          "il"  'markdown-insert-link
+          "iw"  'markdown-insert-wiki-link
+          "iu"  'markdown-insert-uri
+          ;; Element removal
+          "k"   'markdown-kill-thing-at-point
+          ;; List editing
+          "li"  'markdown-insert-list-item
+          ;; Toggles
+          "Ti"  'markdown-toggle-inline-images
+          "Tl"  'markdown-toggle-url-hiding
+          "Tm"  'markdown-toggle-markup-hiding
+          "Tt"  'markdown-toggle-gfm-checkbox
+          "Tw"  'markdown-toggle-wiki-links
+          ;; Table
+          "tp"  'markdown-table-move-row-up
+          "tn"  'markdown-table-move-row-down
+          "tf"  'markdown-table-move-column-right
+          "tb"  'markdown-table-move-column-left
+          "tr"  'markdown-table-insert-row
+          "tR"  'markdown-table-delete-row
+          "tc"  'markdown-table-insert-column
+          "tC"  'markdown-table-delete-column
+          "ts"  'markdown-table-sort-lines
+          "td"  'markdown-table-convert-region
+          "tt"  'markdown-table-transpose
+          ;; region manipulation
+          "xb"  'markdown-insert-bold
+          "xB"  'markdown-insert-gfm-checkbox
+          "xc"  'markdown-insert-code
+          "xC"  'markdown-insert-gfm-code-block
+          "xi"  'markdown-insert-italic
+          "xk"  'markdown-insert-kbd
+          "xp"  'markdown-insert-pre
+          "xq"  'markdown-insert-blockquote
+          "xs"  'markdown-insert-strike-through
+          "xQ"  'markdown-blockquote-region
+          "xP"  'markdown-pre-region
+          ;; Following and Jumping
+          "N"   'markdown-next-link
+          "f"   'markdown-follow-thing-at-point
+          "P"   'markdown-previous-link
+          "<RET>" 'markdown-do)
+        (when (eq 'eww markdown-live-preview-engine)
+          (spacemacs/set-leader-keys-for-major-mode mode
+            "cP" 'markdown-live-preview-mode)))
       ;; Header navigation in normal state movements
       (evil-define-key 'normal markdown-mode-map
         "gj" 'outline-forward-same-level
@@ -149,93 +179,42 @@ Will work on both org-mode and any mode that accepts plain html."
         ;; next visible heading is not exactly what we want but close enough
         "gl" 'outline-next-visible-heading)
       ;; Promotion, Demotion
-      (define-key markdown-mode-map (kbd "M-h") 'markdown-promote)
-      (define-key markdown-mode-map (kbd "M-j") 'markdown-move-down)
-      (define-key markdown-mode-map (kbd "M-k") 'markdown-move-up)
-      (define-key markdown-mode-map (kbd "M-l") 'markdown-demote))))
+      (add-hook 'spacemacs-editing-style-hook
+                'spacemacs//markdown-hjkl-promotion-demotion)
+      (spacemacs//markdown-hjkl-promotion-demotion dotspacemacs-editing-style)
+      (define-key markdown-mode-map (kbd "M-<down>") 'markdown-move-down)
+      (define-key markdown-mode-map (kbd "M-<left>") 'markdown-promote)
+      (define-key markdown-mode-map (kbd "M-<right>") 'markdown-demote)
+      (define-key markdown-mode-map (kbd "M-<up>") 'markdown-move-up))))
 
 (defun markdown/init-markdown-toc ()
   (use-package markdown-toc
     :defer t
-    :init (spacemacs/set-leader-keys-for-major-mode 'markdown-mode
-            "it"  'markdown-toc-generate-toc)))
+    :init
+    (dolist (mode markdown--key-bindings-modes)
+      (spacemacs/set-leader-keys-for-major-mode mode
+        "it" 'markdown-toc-generate-toc))))
 
 (defun markdown/init-mmm-mode ()
   (use-package mmm-mode
     :commands mmm-mode
     :init (add-hook 'markdown-mode-hook 'spacemacs/activate-mmm-mode)
+    ;; Automatically add mmm class for languages
     :config
     (progn
-      (spacemacs|hide-lighter mmm-mode)
-      (mmm-add-classes '((markdown-ini
-                          :submode conf-unix-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```ini[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-python
-                          :submode python-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```python[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-html
-                          :submode web-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```html[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-java
-                          :submode java-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```java[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-ruby
-                          :submode ruby-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```ruby[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-c
-                          :submode c-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```c[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-c++
-                          :submode c++-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```c\+\+[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-elisp
-                          :submode emacs-lisp-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```elisp[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-javascript
-                          :submode javascript-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```javascript[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-ess
-                          :submode R-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```{?r.*}?[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-classes '((markdown-rust
-                          :submode rust-mode
-                          :face mmm-declaration-submode-face
-                          :front "^```rust[\n\r]+"
-                          :back "^```$")))
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-python)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-java)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-ruby)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-c)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-c++)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-elisp)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-html)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-javascript)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-ess)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-rust)
-      (mmm-add-mode-ext-class 'markdown-mode nil 'markdown-ini))))
+      (mapc 'markdown/mmm-auto-class markdown-mmm-auto-modes)
+      (spacemacs|hide-lighter mmm-mode))))
 
 (defun markdown/init-vmd-mode ()
   (use-package vmd-mode
     :defer t
-    :init (spacemacs/set-leader-keys-for-major-mode 'markdown-mode
-            "cP" 'vmd-mode)))
+    :init
+    (dolist (mode markdown--key-bindings-modes)
+      (spacemacs/set-leader-keys-for-major-mode mode
+        "cP" 'vmd-mode))))
+
+(defun markdown/post-init-org ()
+  (when (configuration-layer/layer-used-p 'org)
+    (add-hook 'markdown-mode-hook 'orgtbl-mode)
+    (spacemacs|diminish orgtbl-mode)
+    (add-hook 'markdown-mode-hook 'spacemacs//cleanup-org-tables-on-save)))

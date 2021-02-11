@@ -1,6 +1,6 @@
 ;;; packages.el --- ESS (R) Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,13 +9,33 @@
 ;;
 ;;; License: GPLv3
 
-(setq ess-packages
+(defconst ess-packages
   '(
+    company
+    flycheck
     ess
     ess-R-data-view
-    ess-smart-equals
     golden-ratio
     org))
+
+(defun ess/post-init-company ()
+  ;; Julia
+  (spacemacs|add-company-backends
+    :backends company-ess-julia-objects
+    :modes ess-julia-mode inferior-ess-julia-mode)
+  ;; R
+  (spacemacs|add-company-backends
+    :backends (company-R-library company-R-args company-R-objects :separate)
+    :modes inferior-ess-r-mode)
+
+  ;; Set R company to lsp manually to include file completion
+  (unless (eq (spacemacs//ess-r-backend) 'lsp)
+    (spacemacs|add-company-backends
+      :backends (company-R-library company-R-args company-R-objects :separate)
+      :modes ess-r-mode)))
+
+(defun ess/post-init-flycheck ()
+  (spacemacs/enable-flycheck 'ess-r-mode))
 
 (defun ess/init-ess ()
   (use-package ess-site
@@ -36,7 +56,6 @@
            ("\\.do\\'"           . STA-mode)
            ("\\.ado\\'"          . STA-mode)
            ("\\.[Ss][Aa][Ss]\\'" . SAS-mode)
-           ("\\.jl\\'"           . ess-julia-mode)
            ("\\.[Ss]t\\'"        . S-transcript-mode)
            ("\\.Sout"            . S-transcript-mode)
            ("\\.[Rr]out"         . R-transcript-mode)
@@ -47,78 +66,51 @@
            ("\\.[Jj][Aa][Gg]\\'" . ess-jags-mode)
            ("\\.[Jj][Oo][Gg]\\'" . ess-jags-mode)
            ("\\.[Jj][Mm][Dd]\\'" . ess-jags-mode))
-    :commands (R stata julia SAS)
+    :commands (R stata julia SAS ess-julia-mode)
     :init
     (progn
-      (spacemacs/register-repl 'ess-site 'julia)
-      (spacemacs/register-repl 'ess-site 'R)
-      (spacemacs/register-repl 'ess-site 'SAS)
-      (spacemacs/register-repl 'ess-site 'stata)
-      ;; Explicitly run prog-mode hooks since ess-mode does not derive from
-      ;; prog-mode major-mode
-      (add-hook 'ess-mode-hook 'spacemacs/run-prog-mode-hooks)
-      (when (configuration-layer/package-usedp 'company)
-          (add-hook 'ess-mode-hook 'company-mode))))
+      (setq ess-use-company nil
+						ess-offset-continued 'straight
+            ess-nuke-trailing-whitespace-p t
+            ess-default-style 'DEFAULT)
 
-  ;; R --------------------------------------------------------------------------
-  (with-eval-after-load 'ess-site
-    ;; Follow Hadley Wickham's R style guide
-    (setq ess-first-continued-statement-offset 2
-          ess-continued-statement-offset 0
-          ess-expression-offset 2
-          ess-nuke-trailing-whitespace-p t
-          ess-default-style 'DEFAULT)
+      ;; add support for evil states
+      (evil-set-initial-state 'ess-help-mode 'motion)
 
-    (defun spacemacs/ess-start-repl ()
-      "Start a REPL corresponding to the ess-language of the current buffer."
-      (interactive)
-      (cond
-       ((string= "S" ess-language) (call-interactively 'R))
-       ((string= "STA" ess-language) (call-interactively 'stata))
-       ((string= "SAS" ess-language) (call-interactively 'SAS))))
+      (spacemacs/register-repl 'ess-site #'spacemacs/ess-start-repl)
 
-    (spacemacs/set-leader-keys-for-major-mode 'ess-julia-mode
-      "'"  'julia
-      "si" 'julia)
-    (spacemacs/set-leader-keys-for-major-mode 'ess-mode
-      "'"  'spacemacs/ess-start-repl
-      "si" 'spacemacs/ess-start-repl
-      ;; noweb
-      "cC" 'ess-eval-chunk-and-go
-      "cc" 'ess-eval-chunk
-      "cd" 'ess-eval-chunk-and-step
-      "cm" 'ess-noweb-mark-chunk
-      "cN" 'ess-noweb-previous-chunk
-      "cn" 'ess-noweb-next-chunk
-      ;; REPL
-      "sB" 'ess-eval-buffer-and-go
-      "sb" 'ess-eval-buffer
-      "sD" 'ess-eval-function-or-paragraph-and-step
-      "sd" 'ess-eval-region-or-line-and-step
-      "sL" 'ess-eval-line-and-go
-      "sl" 'ess-eval-line
-      "sR" 'ess-eval-region-and-go
-      "sr" 'ess-eval-region
-      "sT" 'ess-eval-function-and-go
-      "st" 'ess-eval-function
-      ;; R helpers
-      "hd" 'ess-R-dv-pprint
-      "ht" 'ess-R-dv-ctable
-      )
-    (define-key ess-mode-map (kbd "<s-return>") 'ess-eval-line)
-    (define-key inferior-ess-mode-map (kbd "C-j") 'comint-next-input)
-    (define-key inferior-ess-mode-map (kbd "C-k") 'comint-previous-input)))
+      (add-hook 'ess-r-mode-hook #'spacemacs//ess-may-setup-r-lsp)
+      (add-hook 'inferior-ess-mode-hook
+                'spacemacs//ess-fix-read-only-inferior-ess-mode)
+      (add-hook
+       'ess-r-post-run-hook
+       (lambda ()
+         (ess-load-file (make-temp-file nil nil nil
+                                        "Sys.setenv(\"DISPLAY\"=\":0.0\")"))))
 
-(defun ess/init-ess-R-data-view ())
+      (with-eval-after-load 'ess-julia
+        (spacemacs/ess-bind-keys-for-julia))
+      (with-eval-after-load 'ess-r-mode
+        (spacemacs/ess-bind-keys-for-r)
+        (unless (eq (spacemacs//ess-r-backend) 'lsp)
+          (spacemacs/declare-prefix-for-mode 'ess-r-mode "mg" "goto")
+          (define-key ess-doc-map "h" #'ess-display-help-on-object)))
+      (with-eval-after-load 'ess-inf-mode
+        (spacemacs/ess-bind-keys-for-inferior)))
+    :config
+    (define-key ess-mode-map (kbd "<s-return>") #'ess-eval-line))
 
-(defun ess/init-ess-smart-equals ()
-  (use-package ess-smart-equals
+  ;; xref integration added with #96ef5a6
+  (spacemacs|define-jump-handlers ess-mode 'xref-find-definitions))
+
+(defun ess/init-ess-R-data-view ()
+  (use-package ess-R-data-view
     :defer t
-    :if ess-enable-smart-equals
-    :init
-    (progn
-      (add-hook 'ess-mode-hook 'ess-smart-equals-mode)
-      (add-hook 'inferior-ess-mode-hook 'ess-smart-equals-mode))))
+    :config
+    (dolist (mode '(ess-julia-mode ess-r-mode inferior-ess-mode))
+      (spacemacs/set-leader-keys-for-major-mode mode
+        "hp" #'ess-R-dv-pprint
+        "ht" #'ess-R-dv-ctable))))
 
 (defun ess/pre-init-golden-ratio ()
   (spacemacs|use-package-add-hook golden-ratio

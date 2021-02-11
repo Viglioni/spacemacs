@@ -1,6 +1,6 @@
 ;;; packages.el --- C/C++ Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,44 +9,122 @@
 ;;
 ;;; License: GPLv3
 
-(setq c-c++-packages
+(defconst c-c++-packages
   '(
     cc-mode
-    disaster
     clang-format
-    cmake-mode
     company
-    (company-c-headers :toggle (configuration-layer/package-usedp 'company))
-    company-ycmd
+    (company-c-headers :requires company)
+    (cpp-auto-include
+     :location (recipe :fetcher github
+                       :repo "syohex/emacs-cpp-auto-include"))
+    disaster
+    eldoc
     flycheck
     gdb-mi
-    ggtags
+    google-c-style
     helm-cscope
-    helm-gtags
+    org
+    projectile
+    realgud
     semantic
     srefactor
     stickyfunc-enhance
-    ycmd
     xcscope
-    ))
+    ;; lsp
+    (ccls :requires lsp-mode)
+    dap-mode
+    ;; rtags
+    (company-rtags :requires (company rtags))
+    counsel-gtags
+    (flycheck-rtags :requires (flycheck rtags))
+    ggtags
+    helm-gtags
+    (helm-rtags :requires (helm rtags))
+    (ivy-rtags :requires (ivy rtags))
+    rtags
+    ;; ycmd
+    (company-ycmd :requires company)
+    (flycheck-ycmd :requires flycheck)
+    ycmd))
 
 (defun c-c++/init-cc-mode ()
   (use-package cc-mode
     :defer t
     :init
     (progn
-      (add-to-list 'auto-mode-alist
-                   `("\\.h\\'" . ,c-c++-default-mode-for-headers)))
+      (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-backend)
+      (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-backend)
+      (put 'c-c++-backend 'safe-local-variable 'symbolp)
+      (when c-c++-default-mode-for-headers
+        (add-to-list 'auto-mode-alist
+                     `("\\.h\\'" . ,c-c++-default-mode-for-headers)))
+      (when c-c++-enable-auto-newline
+        (add-hook 'c-mode-common-hook 'spacemacs//c-toggle-auto-newline)))
     :config
     (progn
       (require 'compile)
-      (c-toggle-auto-newline 1)
-      (spacemacs/set-leader-keys-for-major-mode 'c-mode
-        "ga" 'projectile-find-other-file
-        "gA" 'projectile-find-other-file-other-window)
+      (dolist (mode c-c++-modes)
+        (spacemacs/declare-prefix-for-mode mode "mc" "compile")
+        (spacemacs/declare-prefix-for-mode mode "mg" "goto")
+        (spacemacs/declare-prefix-for-mode mode "mp" "project")
+        (spacemacs/set-leader-keys-for-major-mode mode
+          "ga" 'projectile-find-other-file
+          "gA" 'projectile-find-other-file-other-window)))))
+
+(defun c-c++/init-ccls ()
+  (use-package ccls
+    :defer t))
+
+(defun c-c++/init-clang-format ()
+  (use-package clang-format
+    :init (spacemacs//c-c++-setup-clang-format)))
+
+(defun c-c++/post-init-company ()
+  (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-company)
+  (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-company))
+
+(defun c-c++/init-company-c-headers ()
+  (use-package company-c-headers
+    :defer t
+    :init (spacemacs|add-company-backends
+            :backends company-c-headers
+            :modes c-mode-common)))
+
+(defun c-c++/init-company-rtags ()
+  (use-package company-rtags
+    :defer t))
+
+(defun c-c++/init-company-ycmd ()
+  (use-package company-ycmd
+    :defer t
+    :commands company-ycmd))
+
+(defun c-c++/post-init-counsel-gtags ()
+  (dolist (mode c-c++-modes)
+    (spacemacs/counsel-gtags-define-keys-for-mode mode)))
+
+(defun c-c++/init-cpp-auto-include ()
+  (use-package cpp-auto-include
+    :defer t
+    :init
+    (progn
+      (when c++-enable-organize-includes-on-save
+        (add-hook 'c++-mode-hook #'spacemacs/c++-organize-includes-on-save))
+
+      (spacemacs/declare-prefix-for-mode 'c++-mode
+        "mr" "refactor")
       (spacemacs/set-leader-keys-for-major-mode 'c++-mode
-        "ga" 'projectile-find-other-file
-        "gA" 'projectile-find-other-file-other-window))))
+        "ri" #'spacemacs/c++-organize-includes))))
+
+(defun c-c++/pre-init-dap-mode ()
+  (pcase (spacemacs//c-c++-backend)
+    (`lsp-clangd (add-to-list 'spacemacs--dap-supported-modes 'c-mode)
+                 (add-to-list 'spacemacs--dap-supported-modes 'c++-mode))
+    (`lsp-ccls (add-to-list 'spacemacs--dap-supported-modes 'c-mode)
+               (add-to-list 'spacemacs--dap-supported-modes 'c++-mode)))
+  (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-dap)
+  (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-dap))
 
 (defun c-c++/init-disaster ()
   (use-package disaster
@@ -54,44 +132,25 @@
     :commands (disaster)
     :init
     (progn
-      (spacemacs/set-leader-keys-for-major-mode 'c-mode
-        "D" 'disaster)
-      (spacemacs/set-leader-keys-for-major-mode 'c++-mode
-        "D" 'disaster))))
+      (dolist (mode c-c++-modes)
+        (spacemacs/set-leader-keys-for-major-mode mode
+          "D" 'disaster)))))
 
-(defun c-c++/init-clang-format ()
-  (use-package clang-format
-    :if c-c++-enable-clang-support))
-
-(defun c-c++/init-cmake-mode ()
-  (use-package cmake-mode
-    :mode (("CMakeLists\\.txt\\'" . cmake-mode) ("\\.cmake\\'" . cmake-mode))
-    :init (push 'company-cmake company-backends-cmake-mode)))
-
-(defun c-c++/post-init-company ()
-  (spacemacs|add-company-hook c-mode-common)
-  (spacemacs|add-company-hook cmake-mode)
-
-  (when c-c++-enable-clang-support
-    (push 'company-clang company-backends-c-mode-common)
-
-    (defun company-mode/more-than-prefix-guesser ()
-      (c-c++/load-clang-args)
-      (company-clang-guess-prefix))
-
-    (setq company-clang-prefix-guesser 'company-mode/more-than-prefix-guesser)
-    (spacemacs/add-to-hooks 'c-c++/load-clang-args '(c-mode-hook c++-mode-hook))))
-
-(defun c-c++/init-company-c-headers ()
-  (use-package company-c-headers
-    :defer t
-    :init (push 'company-c-headers company-backends-c-mode-common)))
+(defun c-c++/post-init-eldoc ()
+  (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-eldoc)
+  (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-eldoc))
 
 (defun c-c++/post-init-flycheck ()
-  (dolist (mode '(c-mode c++-mode))
-    (spacemacs/add-flycheck-hook mode))
-  (when c-c++-enable-clang-support
-    (spacemacs/add-to-hooks 'c-c++/load-clang-args '(c-mode-hook c++-mode-hook))))
+  (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-flycheck)
+  (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-flycheck))
+
+(defun c-c++/init-flycheck-rtags ()
+  (use-package flycheck-rtags
+    :defer t))
+
+(defun c-c++/init-flycheck-ycmd ()
+  (use-package flycheck-ycmd
+    :defer t))
 
 (defun c-c++/post-init-ggtags ()
   (add-hook 'c-mode-local-vars-hook #'spacemacs/ggtags-mode-enable)
@@ -107,41 +166,84 @@
      ;; Non-nil means display source file containing the main routine at startup
      gdb-show-main t)))
 
-(defun c-c++/post-init-helm-gtags ()
-  (spacemacs/helm-gtags-define-keys-for-mode 'c-mode)
-  (spacemacs/helm-gtags-define-keys-for-mode 'c++-mode))
-
-(defun c-c++/post-init-semantic ()
-  (spacemacs/add-to-hooks 'semantic-mode '(c-mode-hook c++-mode-hook)))
-
-(defun c-c++/post-init-srefactor ()
-  (spacemacs/set-leader-keys-for-major-mode 'c-mode "r" 'srefactor-refactor-at-point)
-  (spacemacs/set-leader-keys-for-major-mode 'c++-mode "r" 'srefactor-refactor-at-point)
-  (spacemacs/add-to-hooks 'spacemacs/lazy-load-srefactor '(c-mode-hook c++-mode-hook)))
-
-(defun c-c++/post-init-stickyfunc-enhance ()
-  (spacemacs/add-to-hooks 'spacemacs/lazy-load-stickyfunc-enhance '(c-mode-hook c++-mode-hook)))
-
-(defun c-c++/post-init-ycmd ()
-  (add-hook 'c++-mode-hook 'ycmd-mode)
-  (add-hook 'c-mode-hook 'ycmd-mode)
-  (add-to-list 'spacemacs-jump-handlers-c++-mode '(ycmd-goto :async t))
-  (add-to-list 'spacemacs-jump-handlers-c-mode '(ycmd-goto :async t))
-  (dolist (mode '(c++-mode c-mode))
-    (spacemacs/set-leader-keys-for-major-mode mode
-      "gG" 'ycmd-goto-imprecise)))
-
-(defun c-c++/post-init-company-ycmd ()
-  (push 'company-ycmd company-backends-c-mode-common))
-
-(defun c-c++/pre-init-xcscope ()
-  (spacemacs|use-package-add-hook xcscope
-    :post-init
-    (dolist (mode '(c-mode c++-mode))
-      (spacemacs/set-leader-keys-for-major-mode mode "gi" 'cscope-index-files))))
+(defun c-c++/init-google-c-style ()
+  (use-package google-c-style
+    :defer t
+    :init
+    (progn
+      (when c-c++-enable-google-style
+        (add-hook 'c-mode-common-hook 'google-set-c-style))
+      (when c-c++-enable-google-newline
+        (add-hook 'c-mode-common-hook 'google-make-newline-indent)))))
 
 (defun c-c++/pre-init-helm-cscope ()
   (spacemacs|use-package-add-hook xcscope
     :post-init
-    (dolist (mode '(c-mode c++-mode))
+    (dolist (mode c-c++-modes)
       (spacemacs/setup-helm-cscope mode))))
+
+(defun c-c++/post-init-helm-gtags ()
+  (dolist (mode c-c++-modes)
+    (spacemacs/helm-gtags-define-keys-for-mode mode)))
+
+(defun c-c++/init-helm-rtags ()
+  (use-package helm-rtags
+    :defer t
+    :init (setq rtags-display-result-backend 'helm)))
+
+(defun c-c++/init-ivy-rtags ()
+  (use-package ivy-rtags
+    :defer t
+    :init (setq rtags-display-result-backend 'ivy)))
+
+(defun c-c++/pre-init-org ()
+  (spacemacs|use-package-add-hook org
+    :post-config (add-to-list 'org-babel-load-languages '(C . t))))
+
+(defun c-c++/pre-init-projectile ()
+  (spacemacs|use-package-add-hook projectile
+    :post-config
+    (progn
+      (when c-c++-adopt-subprojects
+        (setq projectile-project-root-files-top-down-recurring
+              (append '("compile_commands.json"
+                        ".ccls")
+                      projectile-project-root-files-top-down-recurring))))))
+
+(defun c-c++/init-rtags ()
+  ;; config in `funcs.el'
+  (use-package rtags
+    :defer t))
+
+(defun c-c++/post-init-realgud ()
+  (dolist (mode c-c++-modes)
+    (spacemacs/add-realgud-debugger mode "gdb")))
+
+(defun c-c++/post-init-semantic ()
+  (add-hook 'c-mode-local-vars-hook #'spacemacs//c-c++-setup-semantic)
+  (add-hook 'c++-mode-local-vars-hook #'spacemacs//c-c++-setup-semantic))
+
+(defun c-c++/post-init-srefactor ()
+  (dolist (mode c-c++-modes)
+    (spacemacs/set-leader-keys-for-major-mode mode "r." 'srefactor-refactor-at-point))
+  (spacemacs/add-to-hooks 'spacemacs/load-srefactor c-c++-mode-hooks))
+
+(defun c-c++/post-init-stickyfunc-enhance ()
+  (spacemacs/add-to-hooks 'spacemacs/load-stickyfunc-enhance c-c++-mode-hooks))
+
+(defun c-c++/pre-init-xcscope ()
+  (spacemacs|use-package-add-hook xcscope
+    :post-init
+    (dolist (mode c-c++-modes)
+      (spacemacs/set-leader-keys-for-major-mode mode "gi" 'cscope-index-files))))
+
+(defun c-c++/init-ycmd ()
+  (use-package ycmd
+    :defer t
+    :init
+    (progn
+      (unless (boundp 'ycmd-global-config)
+        (setq-default ycmd-global-config
+                      (concat (configuration-layer/get-layer-path 'ycmd)
+                              "global_conf.py")))
+      (setq-default ycmd-parse-conditions '(save mode-enabled)))))

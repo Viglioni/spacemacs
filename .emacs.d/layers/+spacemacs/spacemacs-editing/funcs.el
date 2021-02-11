@@ -1,6 +1,6 @@
 ;;; funcs.el --- Spacemacs editing Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -22,14 +22,37 @@
   (indent-according-to-mode))
 
 (defun spacemacs/smart-closing-parenthesis ()
+  "Insert a closing pair delimiter or move point past existing delimiter.
+
+If the expression at point is already balanced and there is a
+closing delimiter for that expression on the current line, move
+point forward past the closing delimiter.
+
+If the expression is balanced but there is no closing delimiter
+on the current line, insert a literal ')' character.
+
+If the expression is not balanced, insert a closing delimiter for
+the current expression.
+
+This command uses Smartparens navigation commands and therefore
+recognizes pair delimiters that have been defined using `sp-pair'
+or `sp-local-pair'."
   (interactive)
   (let* ((sp-navigate-close-if-unbalanced t)
          (current-pos (point))
          (current-line (line-number-at-pos current-pos))
-         (next-pos (save-excursion
-                     (sp-up-sexp)
-                     (point)))
-         (next-line (line-number-at-pos next-pos)))
+         next-pos next-line)
+    (save-excursion
+      (let ((buffer-undo-list)
+            (modified (buffer-modified-p)))
+        (unwind-protect
+            (progn
+              (sp-up-sexp)
+              (setq next-pos (point)
+                    next-line (line-number-at-pos)))
+          (primitive-undo (length buffer-undo-list)
+                          buffer-undo-list)
+          (set-buffer-modified-p modified))))
     (cond
      ((and (= current-line next-line)
            (not (= current-pos next-pos)))
@@ -39,7 +62,8 @@
 
 (defun spacemacs//conditionally-enable-smartparens-mode ()
   "Enable `smartparens-mode' in the minibuffer, during `eval-expression'."
-  (if (eq this-command 'eval-expression)
+  (if (or (eq this-command 'eval-expression)
+          (eq this-command 'eldoc-eval-expression))
       (smartparens-mode)))
 
 (defun spacemacs//adaptive-smartparent-pair-overlay-face ()
@@ -47,6 +71,16 @@
                       :inherit 'lazy-highlight
                       :background nil
                       :foreground nil))
+
+(defun spacemacs//put-clean-aindent-last ()
+  "Put `clean-aindent--check-last-point` to end of `post-command-hook`.
+This functions tries to ensure that clean-aindent checks for indent
+operations after each indent operations have been done.
+
+See issues #6520 and #13172"
+  (when clean-aindent-mode
+    (remove-hook 'post-command-hook 'clean-aindent--check-last-point)
+    (add-hook 'post-command-hook 'clean-aindent--check-last-point t)))
 
 
 ;; uuidgen

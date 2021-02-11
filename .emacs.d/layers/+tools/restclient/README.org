@@ -1,16 +1,22 @@
 #+TITLE: Restclient layer
 
-* Table of Contents                                         :TOC_4_gh:noexport:
- - [[#description][Description]]
- - [[#install][Install]]
- - [[#configuration][Configuration]]
- - [[#restclient][Restclient]]
-   - [[#keybindings][Keybindings]]
- - [[#ob-http][ob-http]]
+#+TAGS: layer|tool
+
+* Table of Contents                     :TOC_5_gh:noexport:
+- [[#description][Description]]
+  - [[#features][Features:]]
+- [[#install][Install]]
+- [[#configuration][Configuration]]
+- [[#restclient][Restclient]]
+  - [[#key-bindings][Key bindings]]
+- [[#ob-http][ob-http]]
 
 * Description
-This layer lets you have a REPL-like interface for http requests using a
-[[https://github.com/pashky/restclient.el][restclient]] buffer or an =org= buffer.
+This layer provides a REPL-like interface for http requests.
+
+** Features:
+- REPL for http requests via [[https://github.com/pashky/restclient.el][restclient]]
+- Alternative =org= integration via [[http://github.com/zweifisch/ob-http][ob-http]]
 
 * Install
 To use this configuration layer, add it to your =~/.spacemacs=. You will need to
@@ -32,15 +38,17 @@ Also there is an [[http://emacsrocks.com/e15.html][Emacs Rocks!]] episode of it.
 There is support for =org-babel= and =restclient= code blocks, for instance:
 
 #+BEGIN_EXAMPLE
-#+BEGIN_SRC restclient
-  GET http://example.com
-#+END_SRC
+
+  #+BEGIN_SRC restclient
+    GET http://example.com
+  #+END_SRC
 #+END_EXAMPLE
 
-** Keybindings
+** Key bindings
 
-| Key Binding | Description                                                 |
+| Key binding | Description                                                 |
 |-------------+-------------------------------------------------------------|
+| ~SPC m j~   | helm-restclient                                             |
 | ~SPC m n~   | Jump to next request                                        |
 | ~SPC m p~   | Jump to previous request                                    |
 | ~SPC m s~   | Send and stay in window (pretty-print response if possible) |

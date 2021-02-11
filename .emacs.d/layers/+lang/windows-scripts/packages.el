@@ -1,6 +1,6 @@
 ;;; packages.el --- Windows Scripts Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,13 +9,13 @@
 ;;
 ;;; License: GPLv3
 
-(setq windows-scripts-packages
+(defconst windows-scripts-packages
   '(
     (dos :location local)
     ggtags
+    counsel-gtags
     helm-gtags
-    powershell
-    ))
+    powershell))
 
 (defun windows-scripts/init-dos ()
   (use-package dos
@@ -49,6 +49,9 @@
 (defun windows-scripts/post-init-ggtags ()
   (add-hook 'dos-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
 
+(defun windows-scripts/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'dos-mode))
+
 (defun windows-scripts/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'dos-mode))
 
@@ -60,16 +63,14 @@
     :init
     (progn
       (defun powershell/define-text-objects ()
-        (spacemacs|define-text-object "$" "dollarparen" "$(" ")")
-        )
+        (spacemacs|define-text-object "$" "dollarparen" "$(" ")"))
       (add-hook 'powershell-mode-hook 'powershell/define-text-objects)
       (spacemacs/set-leader-keys
-        "asp" 'powershell)
+        "atsp" 'powershell)
       (spacemacs/set-leader-keys-for-major-mode 'powershell-mode
         "rr" 'powershell-regexp-to-regex)
-
-    ;; TODO
-    ;; - split out powershell
-    ;; - get help output with mgg (Get-Help) or Get-Help -online
-    ;; -
-    )))
+      ;; TODO
+      ;; - split out powershell
+      ;; - get help output with mgg (Get-Help) or Get-Help -online
+      ;; -
+      )))

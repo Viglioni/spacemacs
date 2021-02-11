@@ -1,6 +1,6 @@
 ;;; funcs.el --- Asm Layer functions File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Tu, Do Hoang <tuhdo1710@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -24,7 +24,7 @@
 ;; colon and the original point the colon was inserted.
 ;;
 ;; These functions solve that problem. First, check whether we have any
-;; space or tab after point. If so, don't do anything becuase the spaces are
+;; space or tab after point. If so, don't do anything because the spaces are
 ;; there intentionally. If not, we delete all trailing spaces between
 ;; point and colon.
 (defvar asm-colon-has-space nil)
