@@ -1,3 +1,6 @@
  [user]
 	email = laura.viglioni@loft.com.br
 	name = Laura
+[github]
+	user = viglioni
+	oauth-token = 
