@@ -27,3 +27,9 @@ Library/Application Support/
 *ispell*
 .cabal/*
 .stack/*
+
+.authinfo
+.org-jira/*
+.shpotify.cfg
+.spacemacs.env
+laurisp/*
