@@ -34,51 +34,60 @@ This function should only modify configuration layer settings."
      ;; ----------------------------------------------------------------
      ;; <<leader> f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     python
-     csv
-     html
-     yaml
+     (auto-completion :variables
+                      auto-completion-tab-key-behavior nil
+                      auto-completion-enable-snippets-in-popup nil)
      (clojure :variables
+              clojure-enable-clj-refactor t
+              clojure-backend 'lsp
               clojure-enable-fancify-symbols t
               clojure-enable-linters 'clj-kondo)
-     (javascript :variables
-                 javascript-backend 'tide
-                 javascript-fmt-tool 'prettier
-                 node-add-modules-path t)
-     (typescript :variables
-                 typescript-backend 'tide
-                 typescript-fmt-tool 'prettier 
-                 typescript-linter 'eslint
-                 )
-     lsp
-     spotify
-     slack
-     haskell
+     csv
+     emacs-lisp
+     emacs-lisp
+     git
+     (haskell :variables
+              haskell-completion-backend 'lsp
+              haskell-enable-hindent t
+              )
      helm
+     html
      (latex :variables
             latex-backend 'lsp
             latex-refresh-preview t
             latex-enable-folding t
             latex-enable-magic t)
-     osx
-     (auto-completion :variables
-                      auto-completion-tab-key-behavior nil
-                      auto-completion-enable-snippets-in-popup t)
-     ;; better-defaults
-     emacs-lisp
-     git
+     lsp 
+     ;; (javascript :variables
+     ;;             typescript-backend 'lsp
+     ;;             typescript-fmt-on-save t
+     ;;             typescript-fmt-tool 'prettier
+     ;;             typescript-linter 'eslint
+     ;;             node-add-modules-path t)
      neotree
      (org :variables
           org-enable-jira-support t
           jiralib-url "https://loftbr.atlassian.net")
+     osx
      pdf
+     python
      (shell :variables
             shell-default-shell 'vterm
             shell-default-height 30
             shell-default-position 'bottom)
+     slack
      spell-checking
+     spotify
+     (sql :variables
+          sql-backend 'lsp
+          lsp-sqls-workspace-config-path nil)
      syntax-checking
-     ;; version-control
+     (typescript :variables
+                 typescript-backend 'lsp
+                 typescript-fmt-on-save t
+                 typescript-fmt-tool 'prettier
+                 )
+     yaml
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -186,8 +195,10 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '(
+                         spacemacs-light
+                         spacemacs-dark
+                         )
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -247,7 +258,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil the default layout name is displayed in the mode-line.
    ;; (default nil)
-   dotspacemacs-display-default-layout nil
+   dotspacemacs-display-default-layout t
 
    ;; If non-nil then the last auto saved layouts are resumed automatically upon
    ;; start. (default nil)
@@ -478,7 +489,7 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
   (add-to-list 'load-path "~/laurisp")
-  (add-to-list 'load-path "~/laurisp/core")
+  
   )
 
 (defun dotspacemacs/user-load ()
@@ -486,7 +497,7 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
 This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump."
-  )
+)
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -494,7 +505,8 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  (require 'laurisp))
+  (require 'laurisp)
+  )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.q
@@ -538,7 +550,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-latex-pdf-process
    '("%latex -interaction nonstopmode -output-directory %o %f" "%latex -interaction nonstopmode -output-directory %o %f" "%latex -interaction nonstopmode -output-directory %o %f" "latexmk -f -pdf %f"))
  '(package-selected-packages
-   '(centered-window org-jira ag ox-slack helm-open-github vterm-toggle erefactor vterm ansi shut-up git commander buttercup helm-ext helm-bibtex writeroom-mode olivetti flycheck-grammarly company-auctex auctex-latexmk tablist company-tabnine unicode-escape names parse-it mocha-snippets mocha ts-comint pdf-tools lexbind-mode async-await aio wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy keychain-environment latex-extra auctex org-fragtog math-symbols latex-math-preview org-projectile org-category-capture org-present org-pomodoro org-mime org-download htmlize gnuplot epresent grizzl import-js list-packages-ext yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js csv-mode tide typescript-mode clomacs xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help memoize all-the-icons yaml-mode dart-mode slack emojify circe oauth2 websocket ht alert log4e gntp spotify helm-spotify-plus multi clojure-snippets clj-refactor inflections paredit cider-eval-sexp-fu cider sesman queue parseedn clojure-mode parseclj a yasnippet-snippets tern rjsx-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data markdown-mode magit-popup gitignore-mode flyspell-correct pos-tip magit git-commit with-editor transient web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc coffee-mode flycheck ghc haskell-mode company yasnippet auto-complete define-word ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline smeargle reveal-in-osx-finder restart-emacs rainbow-delimiters popwin persp-mode pcre2el pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint launchctl intero indent-guide hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish company-statistics company-ghci company-ghc company-cabal column-enforce-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(sql-indent org-jira helm-open-github vterm-toggle erefactor vterm ansi shut-up git commander buttercup helm-ext helm-bibtex writeroom-mode olivetti flycheck-grammarly company-auctex auctex-latexmk tablist company-tabnine unicode-escape names parse-it mocha-snippets mocha ts-comint pdf-tools lexbind-mode async-await aio wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy keychain-environment latex-extra auctex org-fragtog math-symbols latex-math-preview org-projectile org-category-capture org-present org-pomodoro org-mime org-download htmlize gnuplot epresent grizzl import-js list-packages-ext yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic prettier-js csv-mode tide typescript-mode clomacs xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help memoize all-the-icons yaml-mode dart-mode slack emojify circe oauth2 websocket ht alert log4e gntp spotify helm-spotify-plus multi clojure-snippets clj-refactor inflections paredit cider-eval-sexp-fu cider sesman queue parseedn clojure-mode parseclj a yasnippet-snippets tern rjsx-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data markdown-mode magit-popup gitignore-mode flyspell-correct pos-tip magit git-commit with-editor transient web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc coffee-mode flycheck ghc haskell-mode company yasnippet auto-complete define-word ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline smeargle reveal-in-osx-finder restart-emacs rainbow-delimiters popwin persp-mode pcre2el pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint launchctl intero indent-guide hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-hoogle helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag haskell-snippets google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish company-statistics company-ghci company-ghc company-cabal column-enforce-mode cmm-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(standard-indent 2)
  '(tab-width 1))
 (custom-set-faces
