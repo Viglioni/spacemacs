@@ -73,10 +73,11 @@ plugins=(git git-prompt colorize docker dotenv emacs npm nvm osx pip)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-export PATH=~/spacemacs/scripts:$PATH
+#export PATH=~/spacemacs/scripts:$PATH
 export PATH=~/Library/Python/3.7/bin:$PATH
 export PATH=~/flutter/bin:$PATH
 export PATH=./node_modules/.bin:$PATH
+export PATH=~/go/bin:$PATH
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
