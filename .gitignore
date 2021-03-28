@@ -1,12 +1,12 @@
-# ignore everything
+##
+## ignore everything
+##
 *
 
-# especially MacOS
-**/.DS_Store
 
-#
-# Don't ignore
-#
+##
+## Don't ignore
+##
 
 !Library
 # all the icons fonts
@@ -33,3 +33,8 @@
 
 # dorfiles
 dotfiles/**/*
+
+
+##############
+# MacOS
+**/.DS_Store
