@@ -1,3 +1,4 @@
+
 * repo
 
   Clone this repo in your ~/
@@ -18,10 +19,12 @@
 * installs
   third party installs
 
-
+  For Haskell: [[https://www.haskell.org/ghcup/][haskell platform]]
+  
   #+begin_src shell
     pip3 install pygments
-    brew install borkdude/brew/clj-kondo
+
+    # Spell checking
     brew install ispell
     brew install aspell
 
@@ -34,10 +37,31 @@
 
     # For JS/TS stuff:
     npm i -g tern prettier
-    npm install -g import-js
-    npm install -g tsun
+    npm i -g import-js
+    npm i -g tsun
+
+    # For Haskell - after installing haskell platform
+    cabal install apply-refact hlint stylish-haskell hasktags hoogle hindent
+
+    # For clojure
+    brew install clojure-lsp/brew/clojure-lsp-native
+    brew install borkdude/brew/clj-kondo
+
+    # For SQL
+    brew install mysql
+
+    brew install libpq
+    brew link --force libpq
+    ## install ruby and sqlint
+    brew install ruby
+    gem install sqlint
+    ## install go, sqls and sqlfmt
+    brew install go
+    echo 'export PATH="$HOME/go/bin:$PATH"' >> .zshrc 
+    go get github.com/lighttiger2505/sqls # might be wise to check docs
+    # sqlfmt - check url before wgeting
+    wget -q -O - https://github.com/mjibson/sqlfmt/releases/download/v0.4.0/sqlfmt_0.4.0_darwin_amd64.tar.gz | tar -xpvzf - --directory "$HOME/go/bin"
   #+end_src
-  
 
 * .private
 
@@ -53,7 +77,6 @@
         :token "j r r token"
         :subscribed-channels '(general)))
    #+end_src
-
 
 * spacemacs script
 
