@@ -1,35 +1,35 @@
-# emacs
-*~
+# ignore everything
+*
 
-# private
-.private/*
-
-# MacOS
+# especially MacOS
 **/.DS_Store
 
-# ???
-.npm/*
-.*json
-.config/*
-.bash*
-.lein/*
-.config/*
-Library/Caches/*
-Library/Preferences/*
-.nvm/
-.ts_node_repl_history
-.z
-.zcompdump-*  
-Library/Application Support/
-**/*yarn*
-.zsh*
-*aspell*
-*ispell*
-.cabal/*
-.stack/*
+#
+# Don't ignore
+#
 
-.authinfo
-.org-jira/*
-.shpotify.cfg
-.spacemacs.env
-laurisp/*
+!Library
+# all the icons fonts
+!Library/Fonts/*.ttf
+# latex themes
+!Library/texmf/**/*.sty
+
+# banners
+!banners/**/*
+
+# laurisp
+!laurisp/**/*
+
+# .emacs.d
+!.emacs.d/**/*
+
+# git
+!.gitignore
+!.gitmodules
+
+# README, LIC etc
+!README.org
+!LICENCE
+
+# dorfiles
+dotfiles/**/*
