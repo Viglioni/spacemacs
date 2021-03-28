@@ -1,40 +1,77 @@
-##
-## ignore everything
-##
+##############################################
+#####                                    #####
+#####        ignore everything           #####
+#####                                    #####
+##############################################
+
 *
 
 
+##############################################
+#####                                    #####
+#####           Don't ignore             #####
+#####                                    #####
+##############################################
+
+
 ##
-## Don't ignore
+## Library dir
 ##
 
 !Library
-# all the icons fonts
+
+#
+# fonts
+#
+!Library/Fonts
 !Library/Fonts/*.ttf
+
+#
 # latex themes
-!Library/texmf/**/*.sty
+#
+!Library/texmf
+!Library/texmf/tex
+!Library/texmf/tex/latex
 
-# banners
-!banners/**/*
+# metropolis theme
+!Library/texmf/tex/latex/metropolis
+!Library/texmf/tex/latex/metropolis/*.sty
 
-# laurisp
-!laurisp/**/*
+##
+## banners dir
+##
+!banners
+!banners/*
+!banners/img
+!banners/img/*
+!banners/gif
+!banners/gif/*.gif
+!banners/gif/fridays
+!banners/gif/fridays/*.gif
 
-# .emacs.d
-!.emacs.d/**/*
 
-# git
+##
+## git
+##
 !.gitignore
 !.gitmodules
 
-# README, LIC etc
+#
+## README, LIC etc
+##
 !README.org
 !LICENCE
 
-# dorfiles
-dotfiles/**/*
+##
+## dotfiles
+##
+!dotfiles
+!dotfiles/*
+!dotfiles/i3/*
 
 
-##############
+
+###########################
+############## extra ignore
 # MacOS
 **/.DS_Store
