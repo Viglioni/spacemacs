@@ -68,8 +68,16 @@
 !dotfiles
 !dotfiles/*
 !dotfiles/i3/*
+!.zshrc
+!.skhdrc
+!.yabairc
 
-
+##
+## org-babel 
+##
+!org-babel-config
+!org-babel-config/js
+!org-babel-config/js/package.json
 
 ###########################
 ############## extra ignore
