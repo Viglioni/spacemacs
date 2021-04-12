@@ -41,7 +41,8 @@
     npm i -g tsun
 
     # For Haskell - after installing haskell platform
-    cabal install apply-refact hlint stylish-haskell hasktags hoogle hindent
+    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh # https://www.haskell.org/ghcup/
+    cabal install apply-refact hlint stylish-haskell hasktags hoogle hindent implicit-hie
 
     # For clojure
     brew install clojure-lsp/brew/clojure-lsp-native
