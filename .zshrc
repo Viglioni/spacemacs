@@ -103,3 +103,5 @@ export PATH=~/go/bin:$PATH
 
 alias reload=". ~/.zshrc"
 source /usr/local/opt/nvm/nvm.sh
+[ -f "/Users/laura.viglioni/.ghcup/env" ] && source "/Users/laura.viglioni/.ghcup/env" # ghcup-env
+export PATH="$HOME/go/bin:$PATH"
