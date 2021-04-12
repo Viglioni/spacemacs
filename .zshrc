@@ -7,8 +7,8 @@ export ZSH="/Users/laura.viglioni/.oh-my-zsh"
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
-# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="theunraveler"
+# See https://github.com/ohmyzsh/ohms/wiki/Themes
+ZSH_THEME="arrow"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -73,11 +73,11 @@ plugins=(git git-prompt colorize docker dotenv emacs npm nvm osx pip)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-export PATH=~/spacemacs/scripts:$PATH
+
 export PATH=~/Library/Python/3.7/bin:$PATH
 export PATH=~/flutter/bin:$PATH
 export PATH=./node_modules/.bin:$PATH
-# export MANPATH="/usr/local/man:$MANPATH"
+export PATH=~/go/bin:$PATH
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -100,5 +100,8 @@ export PATH=./node_modules/.bin:$PATH
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
 alias reload=". ~/.zshrc"
 source /usr/local/opt/nvm/nvm.sh
+[ -f "/Users/laura.viglioni/.ghcup/env" ] && source "/Users/laura.viglioni/.ghcup/env" # ghcup-env
+export PATH="$HOME/go/bin:$PATH"

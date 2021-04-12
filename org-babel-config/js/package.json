@@ -1,0 +1,17 @@
+{
+  "name": "my-org-babel-libs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "github.com/viglioni/home-sweet-home",
+  "author": "laura-viglioni",
+  "license": "GPLv3",
+  "dependencies": {
+    "ramda": "^0.27.1"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@tsconfig/node12": "^1.0.7",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/ramda": "^0.27.39"
+  }
+}

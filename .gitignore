@@ -1,35 +1,85 @@
-# emacs
-*~
+##############################################
+#####                                    #####
+#####        ignore everything           #####
+#####                                    #####
+##############################################
 
-# private
-.private/*
+*
 
+
+##############################################
+#####                                    #####
+#####           Don't ignore             #####
+#####                                    #####
+##############################################
+
+
+##
+## Library dir
+##
+
+!Library
+
+#
+# fonts
+#
+!Library/Fonts
+!Library/Fonts/*.ttf
+
+#
+# latex themes
+#
+!Library/texmf
+!Library/texmf/tex
+!Library/texmf/tex/latex
+
+# metropolis theme
+!Library/texmf/tex/latex/metropolis
+!Library/texmf/tex/latex/metropolis/*.sty
+
+##
+## banners dir
+##
+!banners
+!banners/*
+!banners/img
+!banners/img/*
+!banners/gif
+!banners/gif/*.gif
+!banners/gif/fridays
+!banners/gif/fridays/*.gif
+
+
+##
+## git
+##
+!.gitignore
+!.gitmodules
+
+#
+## README, LIC etc
+##
+!README.org
+!LICENCE
+
+##
+## dotfiles
+##
+!dotfiles
+!dotfiles/*
+!dotfiles/i3/*
+!.zshrc
+!.skhdrc
+!.yabairc
+
+##
+## org-babel 
+##
+!org-babel-config
+!org-babel-config/js
+!org-babel-config/js/package.json
+
+###########################
+############## extra ignore
 # MacOS
 **/.DS_Store
-
-# ???
-.npm/*
-.*json
-.config/*
-.bash*
-.lein/*
-.config/*
-Library/Caches/*
-Library/Preferences/*
-.nvm/
-.ts_node_repl_history
-.z
-.zcompdump-*  
-Library/Application Support/
-**/*yarn*
-.zsh*
-*aspell*
-*ispell*
-.cabal/*
-.stack/*
-
-.authinfo
-.org-jira/*
-.shpotify.cfg
-.spacemacs.env
-laurisp/*

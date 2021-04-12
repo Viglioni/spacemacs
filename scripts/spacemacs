@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# call spacemacs instead of emacs in shell
-HOME=~/spacemacs emacs $@
