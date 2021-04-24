@@ -4,7 +4,7 @@
   Clone this repo in your ~/
 
 * Submodules
-  1. .emacs.d is a submodule of the develop branch of [[https://github.com/syl20bnr/spacemacs/pull/9209/files][spacemacs]]
+  1. .emacs.d is a submodule of the [[https://github.com/Viglioni/.emacs.d][my fork]] of [[https://github.com/syl20bnr/spacemacs/pull/9209/files][spacemacs]] project
   2. all my elisp config - except ~.spacemacs~ are now in a different project: [[https://github.com/Viglioni/laurisp/][laurisp]]
 
 * spacemacs leader keys
