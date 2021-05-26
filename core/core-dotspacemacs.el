@@ -629,6 +629,11 @@ number of recent files to show in each project."
   'boolean
   'spacemacs-dotspacemacs-init)
 
+(spacemacs|defc dotspacemacs-show-startup-list-numbers t
+  "Show numbers before the startup list lines."
+  'boolean
+  'spacemacs-dotspacemacs-init)
+
 (spacemacs|defc dotspacemacs-startup-buffer-multi-digit-delay 0.4
   "The minimum delay in seconds between number key presses."
   'number
@@ -662,6 +667,11 @@ If non nil activate `clean-aindent-mode' which tries to correct
 virtual indentation of simple modes. This can interfere with mode specific
 indent handling like has been reported for `go-mode'.
 If it does deactivate it here. (default t)"
+  'boolean
+  'spacemacs-dotspacemacs-init)
+
+(spacemacs|defc dotspacemacs-use-SPC-as-y nil
+  "Accept SPC as y for prompts if non nil. (default nil)"
   'boolean
   'spacemacs-dotspacemacs-init)
 

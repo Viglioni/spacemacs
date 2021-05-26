@@ -42,7 +42,6 @@
         (hi-lock :location built-in)
         (image-mode :location built-in)
         (imenu :location built-in)
-        (linum :location built-in :toggle (version< emacs-version "26"))
         (occur-mode :location built-in)
         (package-menu :location built-in)
         ;; page-break-lines is shipped with spacemacs core
@@ -59,6 +58,7 @@
         (visual-line-mode :location built-in)
         (whitespace :location built-in)
         (winner :location built-in)
+        (xref :location built-in)
         (zone :location built-in)))
 
 
@@ -536,6 +536,11 @@
 
       (setq winner-boring-buffers
             (append winner-boring-buffers spacemacs/winner-boring-buffers)))))
+
+(defun spacemacs-defaults/init-xref ()
+  (evilified-state-evilify-map xref--xref-buffer-mode-map
+    :mode xref--xref-buffer-mode
+    :eval-after-load xref))
 
 (defun spacemacs-defaults/init-zone ()
   (use-package zone

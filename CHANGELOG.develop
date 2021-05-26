@@ -77,8 +77,8 @@ the [[file:CHANGELOG.org][CHANGELOG.org]] file.
   Andriy Kmit)
 *** Breaking Changes
 **** Major
-- Support for Emacs 24 has been dropped, the minimal Emacs version is now
-  =25.1=.
+- Support for Emacs 25 has been dropped, the minimal Emacs version is now
+  =26.1=.
 **** Core
 - Change loading order of layers init functions. Previously the =pre-init=,
   =init= and =post-init= function were called in a row for each package. Now
@@ -124,6 +124,8 @@ the [[file:CHANGELOG.org][CHANGELOG.org]] file.
     state (thanks to Sylvain Benner)
   - Restricted ~SPC b C-d~ to only kill other buffers in current perspective
     (thanks to Seong Yong-ju)
+  - Changed ~SPC t t m~ from ~timeclock-modeline-display~ which was deprecated
+    in Emacs 24.3 to ~timeclock-mode-line-display~ (thanks to Zach Pearson)
 - Other:
   - Support for multiple cursors using =evil-mc= is now encapsulated in the
     =multiple-cursors= layer (thanks to Codruț Constantin Gușoi)
@@ -504,12 +506,14 @@ In org-agenda-mode
   - New variable =dotspacemacs-show-trailing-whitespace= (thanks to duianto)
   - New var =dotspacemacs-startup-buffer-multi-digit-delay= (thanks to duianto)
   - New variable =dotspacemacs-scroll-bar-while-scrolling= (thanks to duianto)
+  - New variable =dotspacemacs-show-startup-list-numbers= (thanks to duianto)
 - Removed Variables:
   - Removed unused variable =dotspacemacs-verbose-loading= from
     =.spacemacs.template= (thanks to Ying Qu)
 Other:
   - =.gitignore= now ignores tag files and the bbdb database.
   - =.gitignore= now ignores org-journal-cache-file (thanks to Benjamin Hipple)
+  - =.gitignore= now ignores image-dired-dir (thanks to Alfonso Montero)
   - Added =vim-style-visual-feedback= and =hybrid-style-visual-feedback= style
     variables to enable =evil-goggles= pulse in the Vim and Hybrid editing
     styles, respectively; disabled by default (thanks to Sylvain Benner)
@@ -770,6 +774,8 @@ Other:
   - Enabled eager spacebind bindings by default (thanks to JAremko)
   - Add info about requirement to also load additional-package in user-config
     section (thank to Daniel Nicolai)
+  - New function =spacemacs/inherit-leader-keys-from-parent-mode= to
+    inherit leader key bindings from another mode
 *** Distribution changes
 - Refactored =spacemacs-bootstrap=, =spacemacs-ui=, and =spacemacs-ui-visual=
   layers:
@@ -1479,6 +1485,9 @@ Other:
     (thanks to Sylvain Benner)
   - Removed the assumption that ~C-k~ was bound to =evil-insert-digraph= after
     closing/finishing a company completion (thanks to lovrolu)
+  - Make ~C-j~ and ~C-k~ work when searching/filtering =company= results if in
+    `vim` mode or `hybrid` mode with `hybrid-style-enable-hjkl-bindings` set to
+    `t` (thanks to dankessler)
 - Key bindings:
   - Removed ~C-f~ because it interfered with the default key binding for
     =forward-char= (thanks to scturtle and duianto)
@@ -1798,6 +1807,7 @@ Other:
 **** CSV
 - Key bindings:
   - ~SPC m h~ to =csv-header-line= (thanks to Francesc Elies Henar)
+  - All key bindings also implemented in tsv-mode (thanks to Aaron Zeng)
 **** D
 - Fixes:
   - Fixed =d-mode= flycheck imports on dub projects (thanks to Dietrich Daroch)
@@ -2819,7 +2829,10 @@ files (thanks to Daniel Nicolai)
 - Fixed backspace delete (thanks to Hasan Alirajpurwala)
 - Fixed flycheck-ocaml not initialized warning (thanks to Artur Juraszek)
 - Added =dune= support via =dune-mode= (thanks to Lyman Gillispie)
+- Fixed ocamlformat not properly initialized by following do (thanks to Nicolas Raymond)
 **** Org
+- Provide some sane default strategies for enforcing =TODO= dependencies via
+  =org-todo-dependencies-strategy=. (thanks to Keith Pinson)
 - Load org-mode email integration (mu4e/notmuch) when org is loaded
   (thanks to Steven Allen)
 - Packages:
@@ -3005,6 +3018,7 @@ files (thanks to Daniel Nicolai)
 - Implemented automatic activation of evil insert state after
   =org-insert-drawer=, =org-insert-heading=, =org-insert-item= and
   =org-insert-structure-template= commands (thanks to Andriy Kmit')
+- Added =ox-asciidoc= as org export backend (thanks to Christian "West" Westrom)
 **** Osx
 - Key bindings:
   - Added key bindings to use ~command-1..9~ for selecting window
@@ -3125,7 +3139,7 @@ files (thanks to Daniel Nicolai)
 - Added LSP support, which can be enabled by setting the =python= layer's
   =python-backend= variable to =lsp=
   (thanks to Yuan Fu and Sylvain Benner).
-- The LSP backend can use either the =pyls= (default) server or the =mspyls=
+- The LSP backend can use either the =pylsp= (default) server or the =mspyls=
   (Microsoft) implementation, which may be selected by setting the
   =python-lsp-server= layer variable to =mspyls=
   (thanks to Cormac Cannon).
@@ -3792,6 +3806,9 @@ files (thanks to Daniel Nicolai)
   - private/local/README.md
     - Improved instructions on how to use private/local directory for packages
       (thanks to Daniel Nicolai)
+  - layers/+lang/python/README.org
+    - Corrected typo in python language server install command (thanks to Zach
+      Pearson)
 *** Release notes summarized
   Thanks to: Abhishek(Compro) Prasad, Deepak Khidia, Enze Chi, Grant Shangreaux,
   Igor Almeida, Jiahao Jiang, Miciah Dashiel Butler Masters, Songpeng Zu, Ward

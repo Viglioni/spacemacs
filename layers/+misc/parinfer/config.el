@@ -1,8 +1,8 @@
-;;; funcs.el --- nlinum Layer packages File
+;;; config.el --- parinfer layer config file for Spacemacs.
 ;;
 ;; Copyright (c) 2012-2021 Sylvain Benner & Contributors
 ;;
-;; Author: Thomas de Beauchêne <thomas.de.beauchene@gmail.com>
+;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -20,13 +20,13 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(spacemacs|defc parinfer-auto-download t
+  "If non nil auto install the parinfer rust library"
+  'boolean nil nil)
 
-(defun spacemacs/nlinum-maybe-on ()
-  (when (spacemacs/enable-line-numbers-p)
-    (nlinum-mode)))
+(spacemacs|defc parinfer-library nil
+  "If non nil allows to set a custom library name and folder
 
-(defun spacemacs/nlinum-relative-toggle ()
-  (interactive)
-  (if (not (bound-and-true-p nlinum-relative-mode))
-      (nlinum-mode))
-  (nlinum-relative-toggle))
+Setting a path here and disabling `parinfer-auto-download'
+allows to use a local version of the library."
+  '(file :must-match t) nil nil)

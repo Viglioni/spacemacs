@@ -50,7 +50,6 @@
   - [[#ietf][Ietf]]
   - [[#multiple-cursors][Multiple-cursors]]
   - [[#nav-flash][Nav-flash]]
-  - [[#nlinum][Nlinum]]
   - [[#parinfer][Parinfer]]
   - [[#spacemacs-completion][Spacemacs-completion]]
   - [[#spacemacs-defaults][Spacemacs-defaults]]
@@ -248,6 +247,7 @@
   - [[#web-beautify][Web-beautify]]
   - [[#xclipboard][Xclipboard]]
 - [[#vim][Vim]]
+  - [[#evil-better-jumper][Evil-better-jumper]]
   - [[#evil-commentary][Evil-commentary]]
   - [[#evil-snipe][Evil-snipe]]
   - [[#vim-empty-lines][Vim-empty-lines]]
@@ -763,21 +763,6 @@ navigation command.
 
 Features:
 - Fancy flashing line on navigation.
-
-** Nlinum
-[[file:+misc/nlinum/README.org][+misc/nlinum/README.org]]
-
-This layer provides various styles of line numbering in Spacemacs. It replaces
-=linum= and =linum-relative= with the improved =nlinum= and =nlinum-relative=
-packages.
-
-Please note that on Emacs 26 and newer, this layer also replaces the new native
-line numbers mode (=display-line-numbers-mode=), and because of that it is not
-recommended to use =nlinum= layer on Emacs 26 or newer.
-
-Features:
-- Support for classic ascending line numbering.
-- Support for line numbering relative to the current cursor position.
 
 ** Parinfer
 [[file:+misc/parinfer/README.org][+misc/parinfer/README.org]]
@@ -2184,7 +2169,7 @@ Features:
 - Support for the following backends:
   - [[https://github.com/proofit404/anaconda-mode][anaconda]] (default),
   - [[https://github.com/emacs-lsp/lsp-python-ms][Language Server Protocol]] (experimental - 2 implementations),
-    - python-language-server
+    - python-lsp-server
     - Microsoft python language server
 - Auto-completion
 - Code Navigation
@@ -2452,7 +2437,7 @@ Features:
 ** PDF
 [[file:+readers/pdf/README.org][+readers/pdf/README.org]]
 
-This layer enables support for PDF with the [[https://github.com/politza/pdf-tools][pdf-tools]] package.
+This layer enables support for PDF with the [[https://github.com/vedang/pdf-tools][pdf-tools]] package.
 
 According to the official repository:
 
@@ -3177,6 +3162,16 @@ Features:
 - [[https://github.com/redguardtoo/cliphist][cliphist]] package: integration with clipboard managers on Linux and macOS.
 
 * Vim
+** Evil-better-jumper
+[[file:+vim/evil-better-jumper/README.org][+vim/evil-better-jumper/README.org]]
+
+This layer adds support for [[https://github.com/gilbertw1/better-jumper][better-jumper]]. A configurable jump list
+implementation for Emacs that can be used to easily jump back to previous
+locations.
+
+Features:
+- jump back and forth
+
 ** Evil-commentary
 [[file:+vim/evil-commentary/README.org][+vim/evil-commentary/README.org]]
 
